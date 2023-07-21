@@ -1,0 +1,55 @@
+version: '3.3'
+
+
+services:
+  admin:
+    image: gameneard:latest
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    container_name: gameneard-admin
+    command: sh -c "
+      python manage.py collectstatic --noinput &&
+      python /deploy/startup/create_admin.py &&
+      python manage.py runserver 0:8000"
+    env_file: ../.env
+    restart: always
+    depends_on:
+      - postgresql
+    volumes:
+      - ../src:/app
+    environment:
+      - DOMAINS=127.0.0.1
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    ports:
+      - "8088:8000"
+  bot:
+    image: gameneard:latest
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    container_name: gameneard-bot
+    command: python bot/main.py
+    restart: always
+    depends_on:
+      - postgresql
+    env_file: ../.env
+    volumes:
+      - ../src:/app
+    environment:
+      - DOMAINS=127.0.0.1
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+
+  postgresql:
+    restart: always
+    container_name: gameneard-postgresql
+    image: 'bitnami/postgresql:15'
+    env_file: ../.env
+    ports:
+      - "7432:5432"
+    volumes:
+      - gameneard_postgres_data:/bitnami/postgresql/
+volumes:
+  gameneard_postgres_data: { }

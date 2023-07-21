@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+Django = ">4"
+django-jazzmin = "*"
+psycopg2-binary = "*"
+openpyxl = "*"
+python-telegram-bot = "==20.3"
+django-cors-headers = "*"
+rich = "*"
+
+[requires]
+python_version = "3.10"
