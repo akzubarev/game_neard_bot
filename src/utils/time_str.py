@@ -1,5 +1,6 @@
 from datetime import datetime, date, timedelta
 
+# strf_format = '%d.%m.%Y %H:%M'
 STRF_DATE_TIME = '%d.%m %H:%M'
 STRF_TIME = '%H:%M'
 STRF_WEEKDAY = '%A %d.%m'

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 
 from apps.games.models import Game, Event
 
@@ -11,6 +12,7 @@ class GameAdmin(admin.ModelAdmin):
         'min_players',
         'max_players',
         'recommended_players',
+        'expected_length',
         'link',
     ]
     ordering = ["id"]
@@ -25,12 +27,19 @@ class EventAdmin(admin.ModelAdmin):
         'players_fmt',
         'initiator',
         'comment',
+        'announce_message',
+        'admin_message',
     ]
-    ordering = ["time"]
+    list_display_links = [
+        'game', 'initiator'
+    ]
+    ordering = ["-time"]
 
     @admin.display(description="Players")
     def players_fmt(self, obj):
-        return "\n ".join([str(player) for player in obj.players.all()])
+        return format_html(
+            "\n<br>".join([str(player) for player in obj.players.all()])
+        )
 
     @admin.display(description='Time', ordering='time')
     def time_fmt(self, obj):

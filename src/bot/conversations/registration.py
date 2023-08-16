@@ -4,6 +4,7 @@ from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, \
 
 import bot.const as c
 import bot.database as db
+from bot.utils.auth import not_group
 from config.logging import LogHelper
 
 logger = LogHelper().logger
@@ -11,6 +12,7 @@ logger = LogHelper().logger
 USERNAME = 0
 
 
+@not_group
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "Введите имя и фамилию (Пример: Хидео Кодзима")

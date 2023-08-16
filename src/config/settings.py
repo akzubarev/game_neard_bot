@@ -116,12 +116,12 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 JAZZMIN_SETTINGS = {
-    'site_title': 'Topolteam',
-    'site_header': 'Topolteam',
-    'index_title': 'Topolteam',
-    'site_brand': 'Topolteam',
+    'site_title': 'GameNerd',
+    'site_header': 'GameNerd',
+    'index_title': 'GameNerd',
+    'site_brand': 'GameNerd',
     'site_logo': 'img/hashray_light.png',
-    'welcome_sign': 'Topolteam Admin Console',
+    'welcome_sign': 'GameNerd Admin Console',
     'hide_apps': ['refresh_token'],
     'hide_models': [],
     # 'related_modal_active': True, # security issue

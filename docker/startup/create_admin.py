@@ -1,7 +1,6 @@
 import sys
 import django
 import os
-import const
 
 sys.path[0] = '/app/'
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')

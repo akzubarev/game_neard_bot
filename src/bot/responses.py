@@ -1,8 +1,6 @@
 def handle_response(text: str):
     processed_text = text.lower()
     match processed_text:
-        case "hello":
-            response_text = "Сам иди"
         case _:
-            response_text = "Че?"
+            response_text = "Команда не распознана, попробуйте заново"
     return response_text

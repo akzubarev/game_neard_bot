@@ -5,38 +5,39 @@ services:
   admin:
     image: gamenerd:latest
     build:
-      context: ..
+      context: ../..
       dockerfile: ./docker/Dockerfile
     container_name: gamenerd-admin
     command: sh -c "
       python manage.py collectstatic --noinput &&
+      python manage.py migrate --noinput &&
       python /deploy/startup/create_admin.py &&
       python manage.py runserver 0:8000"
-    env_file: ../.env.prod
+    env_file: ../../.env.dev
     restart: always
     depends_on:
       - postgresql
     volumes:
-      - ../src:/app
+      - ../../src:/app
     environment:
       - DOMAINS=127.0.0.1
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
     ports:
-      - "8000:8000"
+      - "8088:8000"
   bot:
     image: gamenerd:latest
     build:
-      context: ..
+      context: ../..
       dockerfile: ./docker/Dockerfile
     container_name: gamenerd-bot
     command: python bot/main.py
     restart: always
     depends_on:
       - postgresql
-    env_file: ../.env.prod
+    env_file: ../../.env.dev
     volumes:
-      - ../src:/app
+      - ../../src:/app
     environment:
       - DOMAINS=127.0.0.1
       - PYTHONUNBUFFERED=1
@@ -46,7 +47,7 @@ services:
     restart: always
     container_name: gamenerd-postgresql
     image: 'bitnami/postgresql:15'
-    env_file: ../.env.prod
+    env_file: ../../.env.dev
     ports:
       - "7432:5432"
     volumes:

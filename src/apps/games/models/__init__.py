@@ -1,2 +1,2 @@
-from .event import Event
+from .event import Event, EventData
 from .game import Game

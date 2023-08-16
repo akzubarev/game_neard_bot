@@ -22,6 +22,8 @@ class Game(models.Model):
         return f"{self.name}"
 
     def expected_length_str(self):
+        if self.expected_length is None:
+            return "?"
         if self.expected_length.isdigit():
             length = int(self.expected_length)
         elif "-" in self.expected_length:

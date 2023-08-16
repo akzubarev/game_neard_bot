@@ -6,8 +6,10 @@ from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, \
 
 import bot.const as c
 import bot.database as db
-import bot.database.events
-from bot.utils import reply_keyboard, make_rectangle, make_column, logged_in
+from bot.utils import reply_keyboard, make_rectangle, logged_in, \
+    send_to_announces, action_button, send_to_admin, edit_dashboard_admin, \
+    edit_dashboard
+from bot.utils.auth import not_group
 from config.logging import LogHelper
 from utils.time_str import STRF_DATE_TIME
 
@@ -15,10 +17,11 @@ GAME, DATETIME, COMMENT, END = range(4)
 logger = LogHelper().logger
 
 
+@not_group
 @logged_in
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["game"] = {
-        "username": update.message.from_user.username,
+        "telegram_id": update.message.from_user.id,
     }
     games = await db.get_games()
     await update.message.reply_text(
@@ -65,7 +68,7 @@ async def date_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def comment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     comment_text = update.message.text.strip()
     context.user_data["game"]["comment"] = comment_text
-    await save_task(context.user_data["game"])
+    await save_task(context=context)
     await update.message.reply_text(
         reply_text(
             next_stage=END, task_data=context.user_data["game"]
@@ -77,7 +80,7 @@ async def comment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def skip_comment(update: Update,
                        context: ContextTypes.DEFAULT_TYPE) -> int:
     context.user_data["game"]["comment"] = ""
-    await save_task(task_data=context.user_data["game"])
+    await save_task(context=context)
     if update.callback_query is not None:
         await update.callback_query.edit_message_text(
             reply_text(
@@ -101,13 +104,32 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return ConversationHandler.END
 
 
-async def save_task(task_data: dict):
-    await bot.database.events.save_event(
+async def save_task(context: ContextTypes.DEFAULT_TYPE):
+    task_data = context.user_data["game"]
+    event = await db.save_event(
         game_name=task_data.get("game_name"),
         date_time=task_data.get("date_time"),
         comment=task_data.get("comment"),
-        user_username=task_data.get("username")
+        user_telegram_id=task_data.get("telegram_id")
     )
+
+    announce = await send_to_announces(
+        context=context, text=event.announce(admin=False),
+        keyboard=action_button(
+            text="Записаться", command=c.SIGN_UP, key=event.id
+        )
+    )
+    await db.save_announce_message(
+        event_id=event.id, message_id=announce.message_id, admin=False
+    )
+    admin_message = await send_to_admin(
+        context=context, text=event.announce(admin=True), keyboard=None
+    )
+    await db.save_announce_message(
+        event_id=event.id, message_id=admin_message.message_id, admin=True
+    )
+    await edit_dashboard(context=context)
+    await edit_dashboard_admin(context=context)
 
 
 def reply_text(next_stage: int, task_data: dict):

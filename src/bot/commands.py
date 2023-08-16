@@ -1,17 +1,17 @@
-import locale
 import traceback
-from datetime import date, timedelta
 
 from telegram import Update
 from telegram.ext import ContextTypes
 
 import bot.const as c
 import bot.database as db
-from bot.utils import logged_in
-from utils.links import apply_markdown
-from utils.time_str import STRF_DATE_TIME, STRF_WEEKDAY, ru_date
+from bot.utils import logged_in, is_manager, action_button, send_to_announces, \
+    events_list_full, send_to_admin
+from bot.utils.auth import not_group
+from bot.utils.mailing import create_dashboard
 
 
+@not_group
 @logged_in
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = await db.get_user(tg_id=update.message.from_user.id)
@@ -20,47 +20,30 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+@not_group
 @logged_in
 async def my_games(update: Update, context: ContextTypes.DEFAULT_TYPE):
     events = await db.get_events(username=update.message.from_user.username)
-    user_strs = {
-        event_id: '\n'.join([
-            username for username in
-            await db.get_event_players(event_id=event_id)
-        ])
-        for event_str, event_id in events
-    }
     await update.message.reply_text(  # apply_markdown(
         "\n\n".join([
             f"Вы записаны на следующие игры: ",
-            *[f"{event_str}\n{user_strs[event_id]}"
-              for event_str, event_id in events]
+            *[event.other_event_info() for event in events]
         ])  # ), parse_mode="MarkdownV2"
     )
 
 
 async def events_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    events = {
-        ru_date(day): [
-            event_str for event_str, event_id in await db.get_events(day=day)
-        ]
-        for day in [date.today() + timedelta(days=i) for i in range(7)]
-    }
+    events_text = await events_list_full(admin=False)
+    print(events_text)
+    try:
+        await update.message.reply_text(events_text, parse_mode="html")
 
-    res_text = ["Игры в ближайшее время: "]
-    for day_name, day_events in events.items():
-        if len(day_events) > 0:
-            res_text.append(
-                f"<b>{day_name}</b>\n" + "\n".join(day_events)
-            )
-    res_text.append(f"{'-' * 20}\nЗаписаться - /{c.SIGN_UP}")
-    await update.message.reply_text(  # apply_markdown(
-        "\n\n".join(res_text), parse_mode="html"
-    )
+    except Exception as E:
+        traceback.print_exc()
 
 
 async def games_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    games = await db.get_games_linked()
+    games = await db.get_games(linked=True)
     await update.message.reply_text(
         "\n".join([
             f"Список наших игр\: ",
@@ -69,16 +52,29 @@ async def games_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+@not_group
+@is_manager
+async def send_dashboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await create_dashboard(context=context)
+
+
 async def help_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "\n".join([
-            f"/{c.START_REGISTRATION} - регистрация",
-            f"/{c.GAME_LIST} - список игр",
-            f"/{c.EVENTS} - список ближайших игр",
-            f"/{c.SIGN_UP} - записаться на игру",
-            f"/{c.CREATE_GAME} - создать игру",
-            f"/{c.MY_GAMES} - мои игры",
-            f"/{c.LEAVE} - покинуть игру",
-            f"/help - справка",
-        ])
-    )
+    print(update.message.chat_id)
+    user_commands = [
+        f"/{c.START_REGISTRATION} - регистрация",
+        f"/{c.GAME_LIST} - список игр",
+        f"/{c.EVENTS} - список ближайших игр",
+        f"/{c.SIGN_UP} - записаться на игру",
+        f"/{c.CREATE_GAME} - создать игру",
+        f"/{c.MY_GAMES} - мои игры",
+        f"/{c.LEAVE} - покинуть игру",
+        f"/help - справка",
+    ]
+    admin_commands = [
+        f'\n{"-" * 10}Админ{"-" * 10}',
+        f"/{c.DASHBOARD} - отправить в чат ближайшие игры",
+    ]
+    if await db.user_is_manager(tg_id=update.message.from_user.id):
+        user_commands.extend(admin_commands)
+
+    await update.message.reply_text("\n".join(user_commands))

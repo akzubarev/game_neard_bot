@@ -4,13 +4,11 @@ from apps.games.models import Game
 
 
 @sync_to_async()
-def get_games():
-    return [(game.name, game.id) for game in Game.objects.all().order_by("name")]
-
-
-@sync_to_async()
-def get_games_linked():
-    return [(game.linked(), game.id) for game in Game.objects.all().order_by("name")]
+def get_games(linked=False):
+    return [
+        (game.name if linked is False else game.linked(), game.id)
+        for game in Game.objects.all().order_by("name")
+    ]
 
 
 @sync_to_async()
