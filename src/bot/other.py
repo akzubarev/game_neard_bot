@@ -17,12 +17,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if message_type == "group":
         if c.BOT_USERNAME in text:
             new_text = text.replace(c.BOT_USERNAME, '').strip()
-            response = r.handle_response(text=new_text)
-        else:
-            return
+            await update.message.reply_text(r.handle_response(text=new_text))
     else:
-        response = r.handle_response(text=text)
-    await update.message.reply_text(response)
+        await update.message.reply_text(r.handle_response(text=text))
 
 
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
