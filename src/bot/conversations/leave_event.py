@@ -48,7 +48,7 @@ async def event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     context.user_data["event"]["event_id"] = event_id
     context.user_data["event"]["event_descr"] = event_str
     context.user_data["event"]["players"] = "\n".join(
-        (await db.events.get_event(event_id=event_id)).players
+        (await db.events.get_event(event_id=event_id)).players_text()
     )
     await query_message.edit_message_text(
         text=reply_text(

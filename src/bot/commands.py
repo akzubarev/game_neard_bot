@@ -23,7 +23,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @not_group
 @logged_in
 async def my_games(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    events = await db.get_events(username=update.message.from_user.username)
+    events = await db.get_events(telegram_id=update.message.from_user.id)
     await update.message.reply_text(  # apply_markdown(
         "\n\n".join([
             f"Вы записаны на следующие игры: ",
