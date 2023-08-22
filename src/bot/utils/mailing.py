@@ -12,7 +12,8 @@ async def send_to_announces(context: ContextTypes.DEFAULT_TYPE, text,
                             keyboard, parse_mode=None):
     return await context.bot.send_message(
         chat_id=c.TELEGRAM_MAIN_GROUP, text=text,
-        reply_markup=keyboard, parse_mode=parse_mode
+        reply_markup=keyboard, parse_mode=parse_mode,
+        message_thread_id=c.TELEGRAM_SUPERGROUP_ID
     )
 
 
