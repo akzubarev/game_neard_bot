@@ -56,6 +56,7 @@ async def edit_dashboard(context: ContextTypes.DEFAULT_TYPE):
     else:
         await context.bot.edit_message_text(
             chat_id=c.TELEGRAM_MAIN_GROUP,
+            message_thread_id=c.TELEGRAM_SUPERGROUP_ID,
             message_id=context.bot_data[c.LAST_DASHBOARD_ANNOUNCES],
             text=await events_list_full(admin=False, group=True),
             parse_mode="html"
@@ -78,7 +79,8 @@ async def edit_announce_admin(context: ContextTypes.DEFAULT_TYPE,
                               message_id: int, event: EventData):
     try:
         await context.bot.edit_message_text(
-            chat_id=c.TELEGRAM_ADMIN_GROUP, message_id=message_id,
+            chat_id=c.TELEGRAM_ADMIN_GROUP,
+            message_id=message_id,
             text=event.announce(admin=True)
         )
     except Exception as e:
@@ -89,7 +91,9 @@ async def edit_announce(context: ContextTypes.DEFAULT_TYPE, message_id: int,
                         event: EventData):
     try:
         await context.bot.edit_message_text(
-            chat_id=c.TELEGRAM_MAIN_GROUP, message_id=message_id,
+            chat_id=c.TELEGRAM_MAIN_GROUP,
+            message_thread_id=c.TELEGRAM_SUPERGROUP_ID,
+            message_id=message_id,
             text=event.announce(admin=False)
         )
     except Exception as e:
