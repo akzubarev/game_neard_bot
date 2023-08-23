@@ -106,6 +106,7 @@ async def edit_announce(context: ContextTypes.DEFAULT_TYPE, event: EventData):
                 chat_id=c.TELEGRAM_MAIN_GROUP,
                 message_id=event.announce_message,
             )
+            await db.delete_event(event.id)
     except Exception as e:
         traceback.print_exc()
 

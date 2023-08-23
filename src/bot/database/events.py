@@ -55,6 +55,15 @@ def get_event(event_id: int) -> EventData:
 
 
 @sync_to_async()
+def delete_event(event_id: int) -> bool:
+    event = Event.objects.filter(id=event_id).first()
+    if event.players.count() == 0:
+        event.delete()
+        return True
+    return False
+
+
+@sync_to_async()
 def get_dashboard() -> EventData:
     return Event.objects.filter(id=1).first().data()
 
