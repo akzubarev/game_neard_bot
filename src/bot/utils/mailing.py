@@ -65,6 +65,7 @@ async def edit_dashboard(context: ContextTypes.DEFAULT_TYPE):
             chat_id=c.TELEGRAM_MAIN_GROUP,
             message_id=dashboard.announce_message,
             text=await events_list_full(admin=False, group=True),
+            keyboard=action_button(text="Записаться", command=c.SIGN_UP),
             parse_mode="html"
         )
 
