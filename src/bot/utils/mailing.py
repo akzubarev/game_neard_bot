@@ -88,7 +88,7 @@ async def edit_announce_admin(context: ContextTypes.DEFAULT_TYPE,
     try:
         await context.bot.edit_message_text(
             chat_id=c.TELEGRAM_ADMIN_GROUP,
-            message_id=event.admin_message, text=event.announce(admin=True)
+            message_id=event.admin_message, text=event.announce(admin=True),
         )
     except Exception as e:
         traceback.print_exc()
@@ -100,7 +100,10 @@ async def edit_announce(context: ContextTypes.DEFAULT_TYPE, event: EventData):
             await context.bot.edit_message_text(
                 chat_id=c.TELEGRAM_MAIN_GROUP,
                 message_id=event.announce_message,
-                text=event.announce(admin=False)
+                text=event.announce(admin=False),
+                reply_markup=action_button(
+                    text="Записаться", command=c.SIGN_UP
+                ),
             )
         else:
             await context.bot.delete_message(
