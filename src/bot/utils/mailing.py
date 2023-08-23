@@ -71,7 +71,7 @@ async def edit_dashboard(context: ContextTypes.DEFAULT_TYPE):
 
 async def edit_dashboard_admin(context: ContextTypes.DEFAULT_TYPE):
     dashboard = await db.get_dashboard()
-    if dashboard.announce_message is None:
+    if dashboard.admin_message is None:
         await create_dashboard_admin(context=context)
     else:
         await context.bot.edit_message_text(
