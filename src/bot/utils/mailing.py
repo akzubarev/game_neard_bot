@@ -61,11 +61,11 @@ async def edit_dashboard(context: ContextTypes.DEFAULT_TYPE):
     if dashboard.announce_message is None:
         await create_dashboard(context=context)
     else:
-        await context.bot.edit_message_text(
+        await context.bot.edit_message(
             chat_id=c.TELEGRAM_MAIN_GROUP,
             message_id=dashboard.announce_message,
             text=await events_list_full(admin=False, group=True),
-            keyboard=action_button(text="Записаться", command=c.SIGN_UP),
+            reply_markup=action_button(text="Записаться", command=c.SIGN_UP),
             parse_mode="html"
         )
 
