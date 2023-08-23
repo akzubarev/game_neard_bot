@@ -32,7 +32,10 @@ async def create_dashboard(context: ContextTypes.DEFAULT_TYPE):
             text=await events_list_full(admin=False, group=True),
             keyboard=action_button(text="Записаться", command=c.SIGN_UP),
         )
-        context.bot_data[c.LAST_DASHBOARD_ANNOUNCES] = announce.message_id
+        await db.save_announce_message(
+            event_id=(await db.get_dashboard()).id,
+            message_id=announce.message_id, admin=False
+        )
 
     except Exception as e:
         traceback.print_exc()
@@ -44,60 +47,64 @@ async def create_dashboard_admin(context: ContextTypes.DEFAULT_TYPE):
             context=context, keyboard=None, parse_mode="html",
             text=await events_list_full(admin=True, group=True),
         )
-        context.bot_data[c.LAST_DASHBOARD_ADMIN] = message_admin.message_id
+        await db.save_announce_message(
+            event_id=(await db.get_dashboard()).id,
+            message_id=message_admin.message_id, admin=True
+        )
 
     except Exception as e:
         traceback.print_exc()
 
 
 async def edit_dashboard(context: ContextTypes.DEFAULT_TYPE):
-    if c.LAST_DASHBOARD_ANNOUNCES not in context.bot_data:
+    dashboard = await db.get_dashboard()
+    if dashboard.announce_message is None:
         await create_dashboard(context=context)
     else:
         await context.bot.edit_message_text(
             chat_id=c.TELEGRAM_MAIN_GROUP,
-            message_id=context.bot_data[c.LAST_DASHBOARD_ANNOUNCES],
+            message_id=dashboard.announce_message,
             text=await events_list_full(admin=False, group=True),
             parse_mode="html"
         )
 
 
 async def edit_dashboard_admin(context: ContextTypes.DEFAULT_TYPE):
-    if c.LAST_DASHBOARD_ADMIN not in context.bot_data:
+    dashboard = await db.get_dashboard()
+    if dashboard.announce_message is None:
         await create_dashboard_admin(context=context)
     else:
         await context.bot.edit_message_text(
             chat_id=c.TELEGRAM_ADMIN_GROUP,
-            message_id=context.bot_data[c.LAST_DASHBOARD_ADMIN],
+            message_id=dashboard.admin_message,
             text=await events_list_full(admin=True, group=True),
             parse_mode="html"
         )
 
 
 async def edit_announce_admin(context: ContextTypes.DEFAULT_TYPE,
-                              message_id: int, event: EventData):
+                              event: EventData):
     try:
         await context.bot.edit_message_text(
             chat_id=c.TELEGRAM_ADMIN_GROUP,
-            message_id=message_id,
-            text=event.announce(admin=True)
+            message_id=event.admin_message, text=event.announce(admin=True)
         )
     except Exception as e:
         traceback.print_exc()
 
 
-async def edit_announce(context: ContextTypes.DEFAULT_TYPE, message_id: int,
-                        event: EventData):
+async def edit_announce(context: ContextTypes.DEFAULT_TYPE, event: EventData):
     try:
         if len(event.players) > 0:
             await context.bot.edit_message_text(
                 chat_id=c.TELEGRAM_MAIN_GROUP,
-                message_id=message_id,
+                message_id=event.announce_message,
                 text=event.announce(admin=False)
             )
         else:
             await context.bot.delete_message(
-                chat_id=c.TELEGRAM_MAIN_GROUP, message_id=message_id,
+                chat_id=c.TELEGRAM_MAIN_GROUP,
+                message_id=event.announce_message,
             )
     except Exception as e:
         traceback.print_exc()

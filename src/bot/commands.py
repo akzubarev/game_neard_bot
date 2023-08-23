@@ -5,8 +5,7 @@ from telegram.ext import ContextTypes
 
 import bot.const as c
 import bot.database as db
-from bot.utils import logged_in, is_manager, action_button, send_to_announces, \
-    events_list_full, send_to_admin
+from bot.utils import logged_in, is_manager, events_list_full
 from bot.utils.auth import not_group
 from bot.utils.mailing import create_dashboard
 

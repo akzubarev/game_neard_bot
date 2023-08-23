@@ -55,6 +55,11 @@ def get_event(event_id: int) -> EventData:
 
 
 @sync_to_async()
+def get_dashboard() -> EventData:
+    return Event.objects.filter(id=1).first().data()
+
+
+@sync_to_async()
 def add_player(event_id: str, player_tg_id: int):
     event = Event.objects.filter(id=event_id).first()
     player = User.objects.filter(telegram_id=player_tg_id).first()

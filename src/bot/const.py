@@ -22,12 +22,6 @@ EVENTS = 'events'
 # Admin commands
 DASHBOARD = "dashboard"
 
-# Data keys
-LAST_DASHBOARD_ANNOUNCES = "last_dashboard_announces"
-LAST_DASHBOARD_ADMIN = "last_dashboard_admin"
-LAST_ANNOUNCES_ANNOUNCES = "last_announces_announces"
-LAST_ANNOUNCES_ADMIN = "last_announces_admin"
-
 # Texts
 CREATE_GAME_TEXT = f"для создания игры /{CREATE_GAME}"
 SIGN_UP_TEXT = f"для записи на игру /{SIGN_UP}"

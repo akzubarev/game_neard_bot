@@ -74,12 +74,12 @@ async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     )
 
     await edit_announce(
-        context=context, message_id=event.announce_message, event=event
+        context=context, event=event
     )
     await edit_dashboard(context=context)
 
     await edit_announce_admin(
-        context=context, message_id=event.admin_message, event=event
+        context=context, event=event
     )
     await edit_dashboard_admin(context=context)
     await user_game_message(
