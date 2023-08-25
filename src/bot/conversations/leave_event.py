@@ -4,10 +4,9 @@ from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, \
 
 import bot.const as c
 import bot.database as db
-from bot.utils import reply_keyboard, make_rectangle, logged_in, edit_announce, \
-    edit_announce_admin, edit_dashboard, edit_dashboard_admin
+from bot.utils import reply_keyboard, make_rectangle, logged_in
 from bot.utils.auth import not_group
-from bot.utils.mailing import user_game_message
+from bot.utils.mailing import handle_event_change
 from config.logging import LogHelper
 
 EVENT, CONFIRM, END = range(3)
@@ -73,19 +72,11 @@ async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         ), reply_markup=None
     )
 
-    await edit_announce(
-        context=context, event=event
+    await handle_event_change(
+        event=event, user=query_message.from_user,
+        join=False, context=context,
     )
-    await edit_dashboard(context=context)
 
-    await edit_announce_admin(
-        context=context, event=event
-    )
-    await edit_dashboard_admin(context=context)
-    await user_game_message(
-        context=context, username=query_message.from_user.username,
-        event=event, join=False
-    )
     return ConversationHandler.END
 
 

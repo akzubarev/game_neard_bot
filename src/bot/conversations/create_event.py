@@ -6,10 +6,9 @@ from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, \
 
 import bot.const as c
 import bot.database as db
-from bot.utils import reply_keyboard, make_rectangle, logged_in, \
-    send_to_announces, action_button, send_to_admin, edit_dashboard_admin, \
-    edit_dashboard
+from bot.utils import reply_keyboard, make_rectangle, logged_in
 from bot.utils.auth import not_group
+from bot.utils.mailing import handle_event_create
 from config.logging import LogHelper
 from utils.time_str import STRF_DATE_TIME
 
@@ -113,23 +112,7 @@ async def save_task(context: ContextTypes.DEFAULT_TYPE):
         user_telegram_id=task_data.get("telegram_id")
     )
 
-    announce = await send_to_announces(
-        context=context, text=event.announce(admin=False),
-        keyboard=action_button(
-            text="Записаться", command=c.SIGN_UP, key=event.id
-        )
-    )
-    await db.save_announce_message(
-        event_id=event.id, message_id=announce.message_id, admin=False
-    )
-    admin_message = await send_to_admin(
-        context=context, text=event.announce(admin=True), keyboard=None
-    )
-    await db.save_announce_message(
-        event_id=event.id, message_id=admin_message.message_id, admin=True
-    )
-    await edit_dashboard(context=context)
-    await edit_dashboard_admin(context=context)
+    await handle_event_create(event=event, context=context)
 
 
 def reply_text(next_stage: int, task_data: dict):
