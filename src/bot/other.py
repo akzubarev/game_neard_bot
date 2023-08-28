@@ -15,8 +15,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # response = await responses.handle_response(text)
     logger.info(f"{update.message.chat.id}")
     if message_type in ["group", "supergroup"]:
-        if c.BOT_USERNAME in text:
-            new_text = text.replace(c.BOT_USERNAME, '').strip()
+        if f"@{c.BOT_USERNAME}" in text:
+            new_text = text.replace(f"@{c.BOT_USERNAME}", '').strip()
             await update.message.reply_text(r.handle_response(text=new_text))
     else:
         await update.message.reply_text(r.handle_response(text=text))

@@ -39,14 +39,14 @@ async def send_to_admin(context: ContextTypes.DEFAULT_TYPE, text, keyboard,
 
 async def create_dashboard(context: ContextTypes.DEFAULT_TYPE):
     try:
-        announce = await send_to_announces(
+        announce_id = await send_to_announces(
             context=context, parse_mode="html",
             text=await events_list_full(admin=False, group=True),
             keyboard=action_button(text="Записаться", command=c.SIGN_UP),
         )
         await db.save_announce_message(
             event_id=(await db.get_dashboard()).id,
-            message_id=announce.message_id, admin=False
+            message_id=announce_id, admin=False
         )
 
     except Exception as e:
@@ -55,13 +55,13 @@ async def create_dashboard(context: ContextTypes.DEFAULT_TYPE):
 
 async def create_dashboard_admin(context: ContextTypes.DEFAULT_TYPE):
     try:
-        message_admin = await send_to_admin(
+        message_admin_id = await send_to_admin(
             context=context, keyboard=None, parse_mode="html",
             text=await events_list_full(admin=True, group=True),
         )
         await db.save_announce_message(
             event_id=(await db.get_dashboard()).id,
-            message_id=message_admin.message_id, admin=True
+            message_id=message_admin_id, admin=True
         )
 
     except Exception as e:

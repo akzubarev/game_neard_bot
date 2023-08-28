@@ -29,7 +29,7 @@ def reply_keyboard(options: List[List], placeholder: str, buttons=True):
 def action_button(text: str, command: str, key=None):
     match command:
         case c.SIGN_UP:
-            link = f"https://t.me/{c.BOT_LINK}"  # /?start={c.SIGN_UP}"
+            link = f"https://t.me/{c.BOT_USERNAME}"  # /?start={c.SIGN_UP}"
         # case c.SIGN_UP:
         #     link = f"t.me//{c.BOT_USERNAME}/?start={key if key is not None else ''}"
         case _:
