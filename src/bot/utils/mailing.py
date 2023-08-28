@@ -13,11 +13,11 @@ async def send_to_announces(context: ContextTypes.DEFAULT_TYPE, text,
                             keyboard, parse_mode=None) -> int | None:
     message_id = None
     try:
-        message_id = await context.bot.send_message(
+        message_id = (await context.bot.send_message(
             chat_id=c.TELEGRAM_MAIN_GROUP, text=text,
             reply_markup=keyboard, parse_mode=parse_mode,
             message_thread_id=c.TELEGRAM_SUPERGROUP_ID
-        ).message_id
+        )).message_id
     except Exception as e:
         traceback.print_exc()
     return message_id
@@ -27,10 +27,10 @@ async def send_to_admin(context: ContextTypes.DEFAULT_TYPE, text, keyboard,
                         parse_mode=None) -> int | None:
     message_id = None
     try:
-        message_id = await context.bot.send_message(
+        message_id = (await context.bot.send_message(
             chat_id=c.TELEGRAM_ADMIN_GROUP, text=text,
             reply_markup=keyboard, parse_mode=parse_mode
-        )
+        )).message_id
 
     except Exception as e:
         traceback.print_exc()
