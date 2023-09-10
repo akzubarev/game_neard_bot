@@ -5,9 +5,8 @@ from telegram.ext import ContextTypes
 
 import bot.const as c
 import bot.database as db
-from bot.utils import logged_in, is_manager, events_list_full
-from bot.utils.auth import not_group
-from bot.utils.mailing import create_dashboard
+from bot.utils import logged_in, is_manager, events_list_full, not_group
+from bot.utils.event_handling.dashboard import create_dashboard
 
 
 @not_group

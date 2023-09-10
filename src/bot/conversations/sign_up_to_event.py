@@ -4,9 +4,9 @@ from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, \
 
 import bot.const as c
 import bot.database as db
-from bot.utils import reply_keyboard, make_rectangle, logged_in
+from bot.utils import reply_keyboard, make_rectangle, logged_in, \
+    handle_event_change
 from bot.utils.auth import not_group
-from bot.utils.mailing import handle_event_change
 from config.logging import LogHelper
 
 EVENT, CONFIRM, END = range(3)

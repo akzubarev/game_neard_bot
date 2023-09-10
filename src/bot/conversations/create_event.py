@@ -6,9 +6,9 @@ from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, \
 
 import bot.const as c
 import bot.database as db
-from bot.utils import reply_keyboard, make_rectangle, logged_in
+from bot.utils import reply_keyboard, make_rectangle, logged_in, \
+    handle_event_create
 from bot.utils.auth import not_group
-from bot.utils.mailing import handle_event_create
 from config.logging import LogHelper
 from utils.time_str import STRF_DATE_TIME
 
