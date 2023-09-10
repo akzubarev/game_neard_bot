@@ -54,10 +54,11 @@ async def edit_dashboard(context: ContextTypes.DEFAULT_TYPE, new_game=False):
     try:
         dashboard = await db.get_dashboard()
         if dashboard.announce_message is None or new_game is True:
-            context.bot.delete_message(
-                chat_id=c.TELEGRAM_MAIN_GROUP,
-                message_id=dashboard.announce_message
-            )
+            if dashboard.announce_message is not None:
+                await context.bot.delete_message(
+                    chat_id=c.TELEGRAM_MAIN_GROUP,
+                    message_id=dashboard.announce_message
+                )
             await create_dashboard(context=context)
         else:
             try:

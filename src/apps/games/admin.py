@@ -31,7 +31,7 @@ class EventAdmin(admin.ModelAdmin):
         'admin_message',
     ]
     list_display_links = [
-        'game', 'initiator'
+        'id', 'game', 'initiator'
     ]
     ordering = ["-time"]
 

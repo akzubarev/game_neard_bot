@@ -32,7 +32,7 @@ async def handle_event_change(event: EventData, user: User, join: bool,
 async def handle_event_create(event: EventData,
                               context: ContextTypes.DEFAULT_TYPE):
     try:
-        await create_announce(context=context)
+        await create_announce(event=event, context=context)
     except Exception as e:
         traceback.print_exc()
 

@@ -22,8 +22,8 @@ async def send_to_chat(context: ContextTypes.DEFAULT_TYPE, text,
     return message_id
 
 
-async def create_announce(context: ContextTypes.DEFAULT_TYPE,
-                          event: EventData):
+async def create_announce(event: EventData,
+                          context: ContextTypes.DEFAULT_TYPE):
     try:
         announce_id = await send_to_chat(
             context=context, text=event.announce(admin=False),
@@ -48,7 +48,7 @@ async def create_announce(context: ContextTypes.DEFAULT_TYPE,
         traceback.print_exc()
 
 
-async def edit_announce(context: ContextTypes.DEFAULT_TYPE, event: EventData):
+async def edit_announce(event: EventData, context: ContextTypes.DEFAULT_TYPE):
     try:
         if len(event.players) > 0:
             await context.bot.edit_message_text(
@@ -59,7 +59,7 @@ async def edit_announce(context: ContextTypes.DEFAULT_TYPE, event: EventData):
                     text="Записаться", command=c.SIGN_UP
                 ),
             )
-        else:
+        elif event.announce_message is not None:
             await context.bot.delete_message(
                 chat_id=c.TELEGRAM_MAIN_GROUP,
                 message_id=event.announce_message,
