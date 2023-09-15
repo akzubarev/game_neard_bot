@@ -1,5 +1,6 @@
 import traceback
 
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from apps.games.models import EventData
@@ -8,31 +9,29 @@ from bot.utils import action_button
 from .admin import send_to_admin
 
 
-async def send_to_chat(context: ContextTypes.DEFAULT_TYPE, text,
-                       keyboard, parse_mode=None) -> int | None:
-    message_id = None
-    try:
-        message_id = (await context.bot.send_message(
-            chat_id=c.TELEGRAM_MAIN_GROUP, text=text,
-            reply_markup=keyboard, parse_mode=parse_mode,
-            # message_thread_id=None
-        )).message_id
-    except Exception as e:
-        traceback.print_exc()
-    return message_id
-
-
 async def create_announce(event: EventData,
                           context: ContextTypes.DEFAULT_TYPE):
     try:
-        announce_id = await send_to_chat(
-            context=context, text=event.announce(admin=False),
-            keyboard=action_button(
-                text="Записаться", command=c.SIGN_UP, key=event.id
+        if event.link is not None:
+            message = await context.bot.send_photo(
+                chat_id=c.TELEGRAM_MAIN_GROUP,
+                photo=open(event.link, 'rb'),
+                caption=event.announce(admin=False),
+                reply_markup=action_button(
+                    text="Записаться", command=c.SIGN_UP, key=event.id
+                ), parse_mode=ParseMode.HTML,
             )
-        )
+        else:
+            message = await context.bot.send_message(
+                chat_id=c.TELEGRAM_MAIN_GROUP,
+                text=event.announce(admin=False),
+                reply_markup=action_button(
+                    text="Записаться", command=c.SIGN_UP, key=event.id
+                ), parse_mode=ParseMode.HTML,
+                # message_thread_id=None
+            )
         await db.save_announce_message(
-            event_id=event.id, message_id=announce_id, admin=False
+            event_id=event.id, message_id=message.message_id, admin=False
         )
     except Exception as e:
         traceback.print_exc()
@@ -60,10 +59,13 @@ async def edit_announce(event: EventData, context: ContextTypes.DEFAULT_TYPE):
                 ),
             )
         elif event.announce_message is not None:
-            await context.bot.delete_message(
-                chat_id=c.TELEGRAM_MAIN_GROUP,
-                message_id=event.announce_message,
-            )
+            try:
+                await context.bot.delete_message(
+                    chat_id=c.TELEGRAM_MAIN_GROUP,
+                    message_id=event.announce_message,
+                )
+            except Exception as e:
+                traceback.print_exc()
             await db.delete_event(event.id)
     except Exception as e:
         traceback.print_exc()

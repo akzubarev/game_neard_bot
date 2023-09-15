@@ -27,6 +27,7 @@ class EventAdmin(admin.ModelAdmin):
         'players_fmt',
         'initiator',
         'comment',
+        'image',
         'announce_message',
         'admin_message',
     ]
@@ -44,3 +45,7 @@ class EventAdmin(admin.ModelAdmin):
     @admin.display(description='Time', ordering='time')
     def time_fmt(self, obj):
         return obj.time_tmz.strftime("%d.%m.%Y %H:%M")  #:%S
+
+    @admin.display(description='Photo', ordering='image_link')
+    def image(self, obj):
+        return obj.photo_by_link()

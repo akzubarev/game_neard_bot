@@ -1,7 +1,9 @@
+import datetime
 from dataclasses import dataclass
 from zoneinfo import ZoneInfo
 
 from django.db import models
+from django.utils.safestring import mark_safe
 
 from config.settings import TIME_ZONE
 from utils.time_str import STRF_DATE_TIME, STRF_TIME
@@ -11,11 +13,18 @@ from utils.time_str import STRF_DATE_TIME, STRF_TIME
 class EventData:
     id: int
     info: str
+    comment: str
+    time_tmz: datetime.datetime
+    game_name: str
     players: list
     initiator: str
-    str: str
     announce_message: int
     admin_message: int
+    link: str
+
+    def simple_str(self):
+        game_time = self.time_tmz.strftime(STRF_DATE_TIME)
+        return f"{self.game_name} {game_time}"
 
     def players_text(self):
         return '\n'.join([f"@{username}" for username in self.players])
@@ -27,13 +36,22 @@ class EventData:
         return f"{self.info}\n{self.players_text()}"
 
     def other_event_info(self):
-        return f"{self.str}\n{self.players_text()}"
+        return f"{self.simple_str()}\n{self.players_text()}"
 
     def announce(self, admin=False):
         if admin is True:
             return f"@{self.initiator} создал игру {self.full_event_info()}"
         else:
-            return f"@{self.initiator} создал игру {self.short_event_info()}"
+            if self.comment is not None:
+                return "\n\n".join([
+                    self.comment,
+                    f"@{self.initiator} создал игру {self.short_event_info()}",
+                ])
+            else:
+                return f"@{self.initiator} создал игру {self.short_event_info()}"
+
+    def photo_by_link(self):
+        return mark_safe(f'<img src="/{self.link}" width="300" />')
 
 
 class Event(models.Model):
@@ -51,7 +69,8 @@ class Event(models.Model):
     )
 
     players = models.ManyToManyField(
-        to="users.User", related_name="games"
+        to="users.User", related_name="games",
+        blank=True, null=True
     )
 
     announce_message = models.IntegerField(
@@ -60,6 +79,11 @@ class Event(models.Model):
 
     admin_message = models.IntegerField(
         blank=True, null=True,
+    )
+
+    image_link = models.CharField(
+        max_length=1000,
+        blank=True, null=True
     )
 
     def is_full(self):
@@ -89,13 +113,19 @@ class Event(models.Model):
         game_time = self.time_tmz.strftime(STRF_DATE_TIME)
         return f"{self.game.name} {game_time}"
 
+    def photo_by_link(self):
+        return mark_safe(f'<img src="/{self.image_link}" width="300" />')
+
     def data(self, date=True):
         return EventData(
             id=self.id,
             info=self.info(date=date),
             players=self.get_players(),
             initiator=self.initiator.username,
-            str=str(self),
+            game_name=self.game.name,
+            time_tmz=self.time_tmz,
             announce_message=self.announce_message,
-            admin_message=self.admin_message
+            admin_message=self.admin_message,
+            link=self.image_link,
+            comment=self.comment,
         )

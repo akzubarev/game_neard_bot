@@ -18,7 +18,7 @@ logger = LogHelper().logger
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     username = update.message.from_user.username
     context.user_data["event"] = {"username": username}
-    events = [(event.str, event.id) for event in await db.get_events(
+    events = [(event.simple_str(), event.id) for event in await db.get_events(
         filter_full=True, exclude=True, telegram_id=update.message.from_user.id
     )]
     if len(events) > 0:
@@ -45,7 +45,7 @@ async def event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await query_message.answer()
     event_data = await db.get_event(event_id=event_id)
     context.user_data["event"]["event_id"] = event_id
-    context.user_data["event"]["event_descr"] = event_data.str
+    context.user_data["event"]["event_descr"] = event_data.simple_str()
     context.user_data["event"]["players"] = event_data.players_text()
     await query_message.edit_message_text(
         text=reply_text(

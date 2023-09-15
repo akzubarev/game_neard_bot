@@ -20,6 +20,8 @@ class UserAdmin(BaseUserAdmin):
             'fields': [
                 'username',
                 'telegram_id',
+                'is_superuser',
+                'is_staff',
                 'groups'
             ]
         }

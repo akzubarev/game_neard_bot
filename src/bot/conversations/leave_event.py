@@ -21,7 +21,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     username = update.message.from_user.username
     context.user_data["event"] = {"username": username}
     events = [
-        (event.str, event.id) for event in
+        (event.simple_str(), event.id) for event in
         await db.get_events(telegram_id=update.message.from_user.id)
     ]
     if len(events) == 0:
@@ -45,7 +45,7 @@ async def event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await query_message.answer()
     event = await db.events.get_event(event_id=event_id)
     context.user_data["event"]["event_id"] = event_id
-    context.user_data["event"]["event_descr"] = event.str
+    context.user_data["event"]["event_descr"] = event.simple_str()
     context.user_data["event"]["players"] = event.players_text()
     await query_message.edit_message_text(
         text=reply_text(

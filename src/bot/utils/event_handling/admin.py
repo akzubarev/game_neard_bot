@@ -25,8 +25,8 @@ async def user_game_message(context: ContextTypes.DEFAULT_TYPE, username: str,
     try:
         await context.bot.send_message(
             chat_id=c.TELEGRAM_ADMIN_GROUP,
-            text=f"@{username} записался на {event.str}" if join is True
-            else f"@{username} вышел из {event.str}"
+            text=f"@{username} записался на {event.simple_str()}" if join is True
+            else f"@{username} вышел из {event.simple_str()}"
         )
     except Exception as e:
         traceback.print_exc()
@@ -38,7 +38,7 @@ async def send_reminder(event: EventData, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(
             chat_id=user.telegram_id,
             text="\n".join([
-                f"Напоминаем, что вы записаны на {event.str}",
+                f"Напоминаем, что вы записаны на {event.simple_str()}",
                 f"Если планы изменились, покиньте игру с помощью /{c.LEAVE}"
             ]),  # reply_markup=keyboard
         )

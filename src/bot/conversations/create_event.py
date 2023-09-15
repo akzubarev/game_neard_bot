@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from telegram import Update, ReplyKeyboardRemove
@@ -54,19 +55,50 @@ async def date_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         query_message, STRF_DATE_TIME
     ).replace(year=datetime.now().year)
     context.user_data["game"]["date_time"] = game_date_time
-    await update.message.reply_text(
-        text=reply_text(
-            next_stage=COMMENT, task_data=context.user_data["game"]
-        ), reply_markup=reply_keyboard(
-            options=[[("Пропустить", None)]], placeholder="Комментарий",
+    is_manager = await db.user_is_manager(tg_id=update.message.from_user.id)
+    if is_manager is True:
+        await update.message.reply_text(
+            text=reply_text(
+                next_stage=COMMENT, task_data=context.user_data["game"]
+            ), reply_markup=reply_keyboard(
+                options=[[("Пропустить", None)]], placeholder="Комментарий",
+            )
         )
-    )
-    return COMMENT
+        return COMMENT
+    else:
+        await save_task(context=context)
+        await update.message.reply_text(
+            reply_text(
+                next_stage=END, task_data=context.user_data["game"]
+            ), reply_markup=ReplyKeyboardRemove()
+        )
+        return ConversationHandler.END
+
+
+async def save_image(image, name: str, context: ContextTypes.DEFAULT_TYPE):
+    REPORTS_FOLDER = "static/photos"
+    path = f'{REPORTS_FOLDER}/{name}-{datetime.now().strftime("%Y-%m-%d")}.png'
+    if not os.path.exists(REPORTS_FOLDER):
+        os.makedirs(REPORTS_FOLDER)
+    await image.download_to_drive(path)
+    return path
 
 
 async def comment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    comment_text = update.message.text.strip()
-    context.user_data["game"]["comment"] = comment_text
+    if update.message.text is not None:
+        comment_text = update.message.text.strip()
+        context.user_data["game"]["comment"] = comment_text
+
+    if len(update.message.photo) > 0:
+        comment_text = update.message.caption.strip()
+        photo_file = await update.message.photo[-1].get_file()
+        context.user_data["game"]["comment"] = comment_text
+        path = await save_image(
+            image=photo_file, context=context,
+            name=context.user_data["game"]["game_name"],
+        )
+        context.user_data["game"]["link"] = path
+
     await save_task(context=context)
     await update.message.reply_text(
         reply_text(
@@ -106,10 +138,11 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def save_task(context: ContextTypes.DEFAULT_TYPE):
     task_data = context.user_data["game"]
     event = await db.save_event(
+        user_telegram_id=task_data.get("telegram_id"),
         game_name=task_data.get("game_name"),
         date_time=task_data.get("date_time"),
-        comment=task_data.get("comment"),
-        user_telegram_id=task_data.get("telegram_id")
+        comment=task_data.get("comment", None),
+        link=task_data.get("link", None)
     )
 
     await handle_event_create(event=event, context=context)
@@ -132,7 +165,8 @@ def reply_text(next_stage: int, task_data: dict):
         reply_str.append(f"Время игры: {time_fmt}")
 
     if next_stage == COMMENT:
-        reply_str.append("Введите комментарий или /skip чтобы пропустить")
+        reply_str.append(
+            "Введите комментарий (можно прикрепить 1 картинку) или /skip чтобы пропустить")
     elif next_stage > COMMENT:
         reply_str.append(f"Комментарий: {task_data.get('comment')}")
 
@@ -152,7 +186,7 @@ def get_create_event_handler():
             DATETIME: [MessageHandler(not_command, date_time)],
             COMMENT: [
                 CallbackQueryHandler(skip_comment),
-                MessageHandler(not_command, comment),
+                MessageHandler(not_command | filters.PHOTO, comment),
                 CommandHandler("skip", skip_comment)
             ]
         },

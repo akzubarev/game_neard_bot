@@ -12,20 +12,20 @@ from utils.days import day_range
 
 @sync_to_async()
 def save_event(game_name: str, date_time: datetime,
-               comment: str, user_telegram_id: str):
+               comment: str, user_telegram_id: str, link: str):
     return save_event_sync(
         game_name=game_name, date_time=date_time, comment=comment,
-        user_telegram_id=user_telegram_id
+        user_telegram_id=user_telegram_id, link=link
     )
 
 
 def save_event_sync(game_name: str, date_time: datetime,
-                    comment: str, user_telegram_id: str):
+                    comment: str, user_telegram_id: str, link: str):
     user = User.objects.filter(telegram_id=user_telegram_id).first()
     game = Game.objects.filter(name=game_name).first()
     event = Event.objects.create(
         game=game, time=date_time, initiator=user,
-        comment=comment
+        comment=comment, image_link=link
     )
     event.players.add(user)
     return event.data()
