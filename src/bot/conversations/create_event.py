@@ -13,7 +13,7 @@ from bot.utils.auth import not_group
 from config.logging import LogHelper
 from utils.time_str import STRF_DATE_TIME
 
-GAME, DATETIME, COMMENT, END = range(4)
+GAME, DATETIME, JOIN, COMMENT, END = range(5)
 logger = LogHelper().logger
 
 
@@ -22,6 +22,7 @@ logger = LogHelper().logger
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["game"] = {
         "telegram_id": update.message.from_user.id,
+        "join": True
     }
     games = await db.get_games()
     await update.message.reply_text(
@@ -55,16 +56,18 @@ async def date_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         query_message, STRF_DATE_TIME
     ).replace(year=datetime.now().year)
     context.user_data["game"]["date_time"] = game_date_time
+
     is_manager = await db.user_is_manager(tg_id=update.message.from_user.id)
     if is_manager is True:
         await update.message.reply_text(
             text=reply_text(
-                next_stage=COMMENT, task_data=context.user_data["game"]
+                next_stage=JOIN, task_data=context.user_data["game"]
             ), reply_markup=reply_keyboard(
-                options=[[("Пропустить", None)]], placeholder="Комментарий",
+                options=[[("Да", "Да"), ("Нет", "Нет")]],
+                placeholder="Присоединиться?",
             )
         )
-        return COMMENT
+        return JOIN
     else:
         await save_task(context=context)
         await update.message.reply_text(
@@ -73,6 +76,21 @@ async def date_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             ), reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
+
+
+async def join_game(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    query_message = update.callback_query
+    await query_message.answer()
+    join = query_message.data.strip() == "Да"
+    context.user_data["game"]["join"] = join
+    await query_message.edit_message_text(
+        text=reply_text(
+            next_stage=COMMENT, task_data=context.user_data["game"]
+        ), reply_markup=reply_keyboard(
+            options=[[("Пропустить", None)]], placeholder="Комментарий",
+        )
+    )
+    return COMMENT
 
 
 async def save_image(image, name: str, context: ContextTypes.DEFAULT_TYPE):
@@ -142,7 +160,8 @@ async def save_task(context: ContextTypes.DEFAULT_TYPE):
         game_name=task_data.get("game_name"),
         date_time=task_data.get("date_time"),
         comment=task_data.get("comment", None),
-        link=task_data.get("link", None)
+        link=task_data.get("link", None),
+        join=task_data.get("join", None),
     )
 
     await handle_event_create(event=event, context=context)
@@ -164,6 +183,9 @@ def reply_text(next_stage: int, task_data: dict):
         time_fmt = task_data.get('date_time').strftime(STRF_DATE_TIME)
         reply_str.append(f"Время игры: {time_fmt}")
 
+    if next_stage == JOIN:
+        reply_str.append(f"Вы хотите сами присоединиться к игре?")
+
     if next_stage == COMMENT:
         reply_str.append(
             "Введите комментарий (можно прикрепить 1 картинку) или /skip чтобы пропустить")
@@ -184,6 +206,7 @@ def get_create_event_handler():
         states={
             GAME: [CallbackQueryHandler(game)],
             DATETIME: [MessageHandler(not_command, date_time)],
+            JOIN: [CallbackQueryHandler(join_game)],
             COMMENT: [
                 CallbackQueryHandler(skip_comment),
                 MessageHandler(not_command | filters.PHOTO, comment),
@@ -191,4 +214,5 @@ def get_create_event_handler():
             ]
         },
         fallbacks=[CommandHandler("cancel", cancel)],
+        conversation_timeout=c.CONVERSATION_TIMOUT
     )

@@ -19,8 +19,10 @@ def user_is_manager(tg_id: int):
     manager = False
     user = User.objects.filter(telegram_id=str(tg_id)).first()
     if user is not None:
-        manager_group = user.groups.filter(name="Managers").first()
-        manager = manager_group is not None
+        manager = (
+                user.is_superuser or user.is_staff or
+                user.groups.filter(name="Managers").first() is not None
+        )
     return manager
 
 

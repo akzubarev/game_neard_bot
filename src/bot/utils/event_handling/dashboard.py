@@ -58,7 +58,7 @@ async def edit_dashboard(context: ContextTypes.DEFAULT_TYPE, new_game=False):
                 try:
                     await context.bot.delete_message(
                         chat_id=c.TELEGRAM_MAIN_GROUP,
-                        message_id=dashboard.announce_message
+                        message_id=dashboard.announce_message,
                     )
                 except Exception as e:
                     traceback.print_exc()

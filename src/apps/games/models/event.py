@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from zoneinfo import ZoneInfo
 
 from django.db import models
+from django.db.models import Sum
 from django.utils.safestring import mark_safe
 
 from config.settings import TIME_ZONE
@@ -17,6 +18,7 @@ class EventData:
     time_tmz: datetime.datetime
     game_name: str
     players: list
+    plus_ones: dict
     initiator: str
     announce_message: int
     admin_message: int
@@ -27,7 +29,11 @@ class EventData:
         return f"{self.game_name} {game_time}"
 
     def players_text(self):
-        return '\n'.join([f"@{username}" for username in self.players])
+        return '\n'.join([
+            f"@{username}" + (f" (+{self.plus_ones[username]})"
+                              if self.plus_ones[username] > 0 else "")
+            for username in self.players
+        ])
 
     def short_event_info(self):
         return self.info
@@ -70,7 +76,7 @@ class Event(models.Model):
 
     players = models.ManyToManyField(
         to="users.User", related_name="games",
-        blank=True, null=True
+        blank=True
     )
 
     announce_message = models.IntegerField(
@@ -86,8 +92,14 @@ class Event(models.Model):
         blank=True, null=True
     )
 
+    def get_player_count(self):
+        plus_ones = self.plus_ones.aggregate(res=Sum("value")).get(
+            "res", None
+        ) or 0
+        return self.players.count() + plus_ones
+
     def is_full(self):
-        return self.players.count() == self.game.max_players
+        return self.get_player_count() == self.game.max_players
 
     @property
     def time_tmz(self):
@@ -99,7 +111,7 @@ class Event(models.Model):
             STRF_DATE_TIME if date is True else STRF_TIME
         )
         length = f"(~{self.game.expected_length_str()})"
-        players = f"{self.players.count()}/{self.game.max_players} игроков"
+        players = f"{self.get_player_count()}/{self.game.max_players} игроков"
         if date is True:
             res = f"{name} {game_time} {length} {players}"
         else:
@@ -107,7 +119,16 @@ class Event(models.Model):
         return res
 
     def get_players(self):
-        return [f"{player.username}" for player in self.players.all()]
+        return [player.username for player in self.players.all()]
+
+    def get_plus_ones(self):
+        return {
+            player.username: plus_one.value
+            if (plus_one := player.plus_ones.filter(
+                event_id=self.id
+            ).first()) is not None else 0
+            for player in self.players.all()
+        }
 
     def __str__(self):
         game_time = self.time_tmz.strftime(STRF_DATE_TIME)
@@ -121,6 +142,7 @@ class Event(models.Model):
             id=self.id,
             info=self.info(date=date),
             players=self.get_players(),
+            plus_ones=self.get_plus_ones(),
             initiator=self.initiator.username,
             game_name=self.game.name,
             time_tmz=self.time_tmz,

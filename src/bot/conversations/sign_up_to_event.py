@@ -1,6 +1,6 @@
 from telegram import Update, ReplyKeyboardRemove
 from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, \
-    CallbackQueryHandler
+    CallbackQueryHandler, filters, MessageHandler
 
 import bot.const as c
 import bot.database as db
@@ -9,7 +9,7 @@ from bot.utils import reply_keyboard, make_rectangle, logged_in, \
 from bot.utils.auth import not_group
 from config.logging import LogHelper
 
-EVENT, CONFIRM, END = range(3)
+EVENT, CONFIRM, PLUS_ONE, END = range(4)
 logger = LogHelper().logger
 
 
@@ -60,22 +60,47 @@ async def event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query_message = update.callback_query
     await query_message.answer()
-    event_id = context.user_data["event"]["event_id"]
-    event = await db.add_player(
-        event_id=event_id, player_tg_id=query_message.from_user.id
-    )
-    context.user_data["event"]["players"] = event.players_text()
     await query_message.edit_message_text(
         text=reply_text(
-            next_stage=END, task_data=context.user_data["event"]
-        ), reply_markup=None
+            next_stage=PLUS_ONE, task_data=context.user_data["event"]
+        ), reply_markup=reply_keyboard(
+            [[("Пропустить", None)]], placeholder="Пропустить"
+        )
     )
+    return PLUS_ONE
+
+
+async def plus_one(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    query_message = update.callback_query
+    if query_message is not None:
+        user = query_message.from_user
+    else:
+        user = update.message.from_user
+        num = int(update.message.text.strip())
+        context.user_data["event"]["plus_one"] = num
+    event_id = context.user_data["event"]["event_id"]
+    event = await db.add_player(
+        event_id=event_id, player_tg_id=user.id,
+        plus_one=context.user_data["event"].get("plus_one", None)
+    )
+    context.user_data["event"]["players"] = event.players_text()
+    if query_message is not None:
+        await query_message.answer()
+        await query_message.edit_message_text(
+            text=reply_text(
+                next_stage=END, task_data=context.user_data["event"]
+            ), reply_markup=None
+        )
+    else:
+        await update.message.reply_text(
+            text=reply_text(
+                next_stage=END, task_data=context.user_data["event"]
+            ), reply_markup=None
+        )
 
     await handle_event_change(
-        event=event, user=query_message.from_user,
-        join=True, context=context,
+        event=event, user=user, join=True, context=context,
     )
-
     return ConversationHandler.END
 
 
@@ -104,6 +129,11 @@ def reply_text(next_stage: int, task_data: dict):
     elif next_stage > CONFIRM:
         reply_str.append(f"Игроки: {task_data.get('players')}")
 
+    if next_stage == PLUS_ONE:
+        reply_str.extend([
+            "Если с вами придут +1, напишите их количество (Пример: 2)"
+        ])
+
     if next_stage == END:
         reply_str.extend(["-" * 20, "Записано"])
     else:
@@ -112,11 +142,17 @@ def reply_text(next_stage: int, task_data: dict):
 
 
 def get_sign_up_to_event_handler():
+    not_command = filters.TEXT & ~filters.COMMAND
     return ConversationHandler(
         entry_points=[CommandHandler(c.SIGN_UP, start)],
         states={
             EVENT: [CallbackQueryHandler(event)],
+            PLUS_ONE: [
+                CallbackQueryHandler(plus_one),
+                MessageHandler(not_command, plus_one),
+            ],
             CONFIRM: [CallbackQueryHandler(confirm)],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
+        conversation_timeout=c.CONVERSATION_TIMOUT
     )

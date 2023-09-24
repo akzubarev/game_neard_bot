@@ -11,8 +11,7 @@ logger = LogHelper().logger
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_type = update.message.chat.type
     text = str(update.message.text).lower()
-    logger.info(f"{update.message.chat.id} {message_type} {text}")
-    # response = await responses.handle_response(text)
+    # logger.info(f"{update.message.chat.id} {message_type} {text}")
     logger.info(f"{update.message.chat.id}")
     if message_type in ["group", "supergroup"]:
         if f"@{c.BOT_USERNAME}" in text:

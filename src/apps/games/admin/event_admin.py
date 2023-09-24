@@ -1,21 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-
-from apps.games.models import Game, Event
-
-
-@admin.register(Game)
-class GameAdmin(admin.ModelAdmin):
-    list_display = [
-        'id',
-        'name',
-        'min_players',
-        'max_players',
-        'recommended_players',
-        'expected_length',
-        'link',
-    ]
-    ordering = ["id"]
+from apps.games.models import Event
 
 
 @admin.register(Event)

@@ -6,20 +6,20 @@ from django.utils.timezone import make_aware
 
 from apps.games.models import Game, Event
 from apps.games.models.event import EventData
-from apps.users.models import User
+from apps.users.models import User, PlusOne
 from utils.days import day_range
 
 
 @sync_to_async()
-def save_event(game_name: str, date_time: datetime,
+def save_event(game_name: str, date_time: datetime, join: bool,
                comment: str, user_telegram_id: str, link: str):
     return save_event_sync(
         game_name=game_name, date_time=date_time, comment=comment,
-        user_telegram_id=user_telegram_id, link=link
+        user_telegram_id=user_telegram_id, link=link, join=join
     )
 
 
-def save_event_sync(game_name: str, date_time: datetime,
+def save_event_sync(game_name: str, date_time: datetime, join: bool,
                     comment: str, user_telegram_id: str, link: str):
     user = User.objects.filter(telegram_id=user_telegram_id).first()
     game = Game.objects.filter(name=game_name).first()
@@ -27,7 +27,8 @@ def save_event_sync(game_name: str, date_time: datetime,
         game=game, time=date_time, initiator=user,
         comment=comment, image_link=link
     )
-    event.players.add(user)
+    if join is True:
+        event.players.add(user)
     return event.data()
 
 
@@ -69,10 +70,12 @@ def get_dashboard() -> EventData:
 
 
 @sync_to_async()
-def add_player(event_id: str, player_tg_id: int):
+def add_player(event_id: str, player_tg_id: int, plus_one: int | None):
     event = Event.objects.filter(id=event_id).first()
     player = User.objects.filter(telegram_id=player_tg_id).first()
     event.players.add(player)
+    if plus_one is not None:
+        PlusOne.objects.create(event=event, user=player, value=plus_one)
     return event.data()
 
 
@@ -81,6 +84,9 @@ def remove_player(event_id: str, player_tg_id: int):
     event = Event.objects.filter(id=event_id).first()
     player = User.objects.filter(telegram_id=player_tg_id).first()
     event.players.remove(player)
+    plus_one = event.plus_ones.filter(user__id=player.id).first()
+    if plus_one is not None:
+        plus_one.delete()
     return event.data()
 
 
