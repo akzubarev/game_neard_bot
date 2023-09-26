@@ -1,3 +1,5 @@
+import traceback
+
 from telegram import Update, ReplyKeyboardRemove
 from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, \
     CallbackQueryHandler, filters, MessageHandler
@@ -16,27 +18,32 @@ logger = LogHelper().logger
 @not_group
 @logged_in
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    username = update.message.from_user.username
-    context.user_data["event"] = {"username": username}
-    events = [(event.simple_str(), event.id) for event in await db.get_events(
-        filter_full=True, exclude=True, telegram_id=update.message.from_user.id
-    )]
-    if len(events) > 0:
-        await update.message.reply_text(
-            reply_text(next_stage=EVENT, task_data=context.user_data["event"]),
-            reply_markup=reply_keyboard(
-                options=[[events[0]], *make_rectangle(events[1:])],
-                placeholder="Игра"
+    try:
+        context.user_data["event"] = dict()
+        events = [(event.simple_str(), event.id) for event in
+                  await db.get_events(
+                      filter_full=True, exclude=True,
+                      telegram_id=update.message.from_user.id
+                  )]
+        if len(events) > 0:
+            await update.message.reply_text(
+                reply_text(next_stage=EVENT,
+                           task_data=context.user_data["event"]),
+                reply_markup=reply_keyboard(
+                    options=[[events[0]], *make_rectangle(events[1:])],
+                    placeholder="Игра"
+                )
             )
-        )
-        return EVENT
+            return EVENT
 
-    else:
-        await update.message.reply_text(
-            f"В данный момент нет игр, в которые можно записаться, можете создать свою (/{c.CREATE_GAME})",
-            reply_markup=None
-        )
-        return ConversationHandler.END
+        else:
+            await update.message.reply_text(
+                f"В данный момент нет игр, в которые можно записаться, можете создать свою (/{c.CREATE_GAME})",
+                reply_markup=None
+            )
+            return ConversationHandler.END
+    except Exception as e:
+        traceback.print_exc()
 
 
 async def event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
