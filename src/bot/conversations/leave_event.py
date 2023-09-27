@@ -119,5 +119,6 @@ def get_leave_event_handler():
             CONFIRM: [CallbackQueryHandler(confirm)],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
-        conversation_timeout=c.CONVERSATION_TIMOUT
+        conversation_timeout=c.CONVERSATION_TIMOUT,
+        allow_reentry=True
     )

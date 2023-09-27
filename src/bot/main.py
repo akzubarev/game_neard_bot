@@ -31,13 +31,16 @@ def main():
     app.add_handler(CommandHandler(c.DASHBOARD, comm.send_dashboard))
 
     # Conversation
-    app.add_handler(convo.get_registration_handler())
-    app.add_handler(convo.get_create_event_handler())
-    app.add_handler(convo.get_sign_up_to_event_handler())
-    app.add_handler(convo.get_leave_event_handler())
+    app.add_handler(convo.get_sign_up_to_event_handler(), group=1)
+    app.add_handler(convo.get_create_event_handler(), group=2)
+    app.add_handler(convo.get_leave_event_handler(), group=3)
+    app.add_handler(convo.get_registration_handler(), group=4)
 
     # Messages
-    app.add_handler(MessageHandler(filters.TEXT, o.handle_message))
+    # for group in range(1, 5):
+    #     app.add_handler(
+    #         MessageHandler(filters.TEXT, o.handle_message), group=group
+    #     )
 
     # Errors
     app.add_error_handler(o.error)

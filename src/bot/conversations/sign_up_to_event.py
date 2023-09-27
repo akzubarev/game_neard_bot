@@ -159,7 +159,9 @@ def get_sign_up_to_event_handler():
                 MessageHandler(not_command, plus_one),
             ],
             CONFIRM: [CallbackQueryHandler(confirm)],
+            # ConversationHandler.TIMEOUT: []
         },
         fallbacks=[CommandHandler("cancel", cancel)],
-        conversation_timeout=c.CONVERSATION_TIMOUT
+        conversation_timeout=c.CONVERSATION_TIMOUT,
+        allow_reentry=True
     )

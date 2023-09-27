@@ -1,5 +1,3 @@
-import traceback
-
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -10,12 +8,19 @@ from bot.utils.event_handling.dashboard import create_dashboard
 
 
 @not_group
-@logged_in
+# @logged_in
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = await db.get_user(tg_id=update.message.from_user.id)
-    await update.message.reply_text(
-        f"Добрый день, {user.first_name}, {c.SIGN_UP_TEXT}"
-    )
+    tg_id = update.message.from_user.id
+    user = await db.get_user(tg_id=tg_id)
+    if user is None:
+        await db.create_user(
+            tg_id=tg_id, first_name=None, last_name=None,
+            username=update.message.from_user.username
+        )
+    elif user.first_name is not None:
+        await update.message.reply_text(
+            f"Добрый день, {user.first_name}, {c.SIGN_UP_TEXT}"
+        )
 
 
 @not_group
@@ -32,12 +37,7 @@ async def my_games(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def events_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
     events_text = await events_list_full(admin=False)
-    print(events_text)
-    try:
-        await update.message.reply_text(events_text, parse_mode="html")
-
-    except Exception as E:
-        traceback.print_exc()
+    await update.message.reply_text(events_text, parse_mode="html")
 
 
 async def games_list(update: Update, context: ContextTypes.DEFAULT_TYPE):

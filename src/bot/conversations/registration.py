@@ -48,5 +48,6 @@ def get_registration_handler():
             ],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
-        conversation_timeout=c.CONVERSATION_TIMOUT
+        conversation_timeout=c.CONVERSATION_TIMOUT,
+        allow_reentry=True
     )
