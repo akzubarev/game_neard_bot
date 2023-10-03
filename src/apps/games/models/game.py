@@ -1,6 +1,6 @@
 from django.db import models
 
-from utils.links import hlink
+from utils.links import hlink, ready_for_links
 
 
 class Game(models.Model):
@@ -39,4 +39,4 @@ class Game(models.Model):
             return f"{self.expected_length} часов"
 
     def linked(self):
-        return hlink(text=self.name, link=self.link)
+        return hlink(text=ready_for_links(self.name), link=self.link)
