@@ -10,7 +10,12 @@ from .admin import send_to_admin
 
 
 async def create_announce(event: EventData,
-                          context: ContextTypes.DEFAULT_TYPE):
+                          context: ContextTypes.DEFAULT_TYPE,
+                          is_manager: bool):
+    worthy = is_manager and (
+            event.comment is not None or event.link is not None
+    )
+    subchat_id = c.TELEGRAM_SUPERGROUP_ID if worthy else None
     try:
         if event.link is not None:
             message = await context.bot.send_photo(
@@ -20,6 +25,7 @@ async def create_announce(event: EventData,
                 reply_markup=action_button(
                     text="Записаться", command=c.SIGN_UP, key=event.id
                 ), parse_mode=ParseMode.HTML,
+                message_thread_id=subchat_id
             )
         else:
             message = await context.bot.send_message(
@@ -28,7 +34,7 @@ async def create_announce(event: EventData,
                 reply_markup=action_button(
                     text="Записаться", command=c.SIGN_UP, key=event.id
                 ), parse_mode=ParseMode.HTML,
-                # message_thread_id=None
+                message_thread_id=subchat_id
             )
         await db.save_announce_message(
             event_id=event.id, message_id=message.message_id, admin=False

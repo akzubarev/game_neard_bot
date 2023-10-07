@@ -164,7 +164,10 @@ async def save_task(context: ContextTypes.DEFAULT_TYPE):
         join=task_data.get("join", None),
     )
 
-    await handle_event_create(event=event, context=context)
+    is_manager = await db.user_is_manager(tg_id=task_data.get("telegram_id"))
+    await handle_event_create(
+        event=event, context=context, is_manager=is_manager
+    )
 
 
 def reply_text(next_stage: int, task_data: dict):

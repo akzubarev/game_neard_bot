@@ -58,7 +58,9 @@ async def event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         text=reply_text(
             next_stage=CONFIRM, task_data=context.user_data["event"]
         ), reply_markup=reply_keyboard(
-            [[("Записаться", None)]], placeholder="Записаться"
+            [[("Записаться одному", None),
+              ("Записаться с друзьями", "PLUS_ONE")]],
+            placeholder="Записаться"
         )
     )
     return CONFIRM
@@ -67,44 +69,45 @@ async def event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query_message = update.callback_query
     await query_message.answer()
-    await query_message.edit_message_text(
-        text=reply_text(
-            next_stage=PLUS_ONE, task_data=context.user_data["event"]
-        ), reply_markup=reply_keyboard(
-            [[("Пропустить", None)]], placeholder="Пропустить"
-        )
-    )
-    return PLUS_ONE
-
-
-async def plus_one(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query_message = update.callback_query
-    if query_message is not None:
-        user = query_message.from_user
-    else:
-        user = update.message.from_user
-        num = int(update.message.text.strip())
-        context.user_data["event"]["plus_one"] = num
     event_id = context.user_data["event"]["event_id"]
     event = await db.add_player(
-        event_id=event_id, player_tg_id=user.id,
+        event_id=event_id, player_tg_id=query_message.from_user.id,
         plus_one=context.user_data["event"].get("plus_one", None)
     )
     context.user_data["event"]["players"] = event.players_text()
-    if query_message is not None:
-        await query_message.answer()
+    if query_message.data.strip() == "PLUS_ONE":
+        await query_message.edit_message_text(
+            text=reply_text(
+                next_stage=PLUS_ONE, task_data=context.user_data["event"]
+            ), reply_markup=reply_keyboard(
+                [[("Пропустить", None)]], placeholder="Пропустить"
+            )
+        )
+        return PLUS_ONE
+    else:
         await query_message.edit_message_text(
             text=reply_text(
                 next_stage=END, task_data=context.user_data["event"]
             ), reply_markup=None
         )
-    else:
-        await update.message.reply_text(
-            text=reply_text(
-                next_stage=END, task_data=context.user_data["event"]
-            ), reply_markup=None
+        await handle_event_change(
+            event=event, user=query_message.from_user,
+            join=True, context=context,
         )
+        return ConversationHandler.END
 
+
+async def plus_one(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user = update.message.from_user
+    num = int(update.message.text.strip())
+    context.user_data["event"]["plus_one"] = num
+    await update.message.reply_text(
+        text=reply_text(
+            next_stage=END, task_data=context.user_data["event"]
+        ), reply_markup=None
+    )
+    event_id = context.user_data["event"]["event_id"]
+    event = await db.get_event(event_id=event_id)
     await handle_event_change(
         event=event, user=user, join=True, context=context,
     )
