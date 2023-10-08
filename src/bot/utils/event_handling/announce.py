@@ -52,14 +52,24 @@ async def create_announce(event: EventData,
 async def edit_announce(event: EventData, context: ContextTypes.DEFAULT_TYPE):
     try:
         if len(event.players) > 0:
-            await context.bot.edit_message_text(
-                chat_id=c.TELEGRAM_MAIN_GROUP,
-                message_id=event.announce_message,
-                text=event.announce(admin=False),
-                reply_markup=action_button(
-                    text="Записаться", command=c.SIGN_UP
-                ),
-            )
+            if event.link is None:
+                await context.bot.edit_message_text(
+                    chat_id=c.TELEGRAM_MAIN_GROUP,
+                    message_id=event.announce_message,
+                    text=event.announce(admin=False),
+                    reply_markup=action_button(
+                        text="Записаться", command=c.SIGN_UP
+                    ),
+                )
+            else:
+                await context.bot.edit_message_caption(
+                    chat_id=c.TELEGRAM_MAIN_GROUP,
+                    message_id=event.announce_message,
+                    text=event.announce(admin=False),
+                    reply_markup=action_button(
+                        text="Записаться", command=c.SIGN_UP
+                    ),
+                )
         elif event.announce_message is not None:
             try:
                 await context.bot.delete_message(
