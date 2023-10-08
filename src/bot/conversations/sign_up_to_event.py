@@ -69,12 +69,7 @@ async def event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query_message = update.callback_query
     await query_message.answer()
-    event_id = context.user_data["event"]["event_id"]
-    event = await db.add_player(
-        event_id=event_id, player_tg_id=query_message.from_user.id,
-        plus_one=context.user_data["event"].get("plus_one", None)
-    )
-    context.user_data["event"]["players"] = event.players_text()
+
     if query_message.data.strip() == "PLUS_ONE":
         await query_message.edit_message_text(
             text=reply_text(
@@ -85,6 +80,11 @@ async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         )
         return PLUS_ONE
     else:
+        event_id = context.user_data["event"]["event_id"]
+        event = await db.add_player(
+            event_id=event_id, player_tg_id=query_message.from_user.id
+        )
+        context.user_data["event"]["players"] = event.players_text()
         await query_message.edit_message_text(
             text=reply_text(
                 next_stage=END, task_data=context.user_data["event"]
@@ -100,14 +100,18 @@ async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def plus_one(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user = update.message.from_user
     num = int(update.message.text.strip())
-    context.user_data["event"]["plus_one"] = num
+    event_id = context.user_data["event"]["event_id"]
+    event = await db.add_player(
+        event_id=event_id, player_tg_id=user.id,
+        plus_one=num
+    )
+    context.user_data["event"]["players"] = event.players_text()
+
     await update.message.reply_text(
         text=reply_text(
             next_stage=END, task_data=context.user_data["event"]
         ), reply_markup=None
     )
-    event_id = context.user_data["event"]["event_id"]
-    event = await db.get_event(event_id=event_id)
     await handle_event_change(
         event=event, user=user, join=True, context=context,
     )

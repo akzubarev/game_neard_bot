@@ -12,9 +12,6 @@ from .admin import send_to_admin
 async def create_announce(event: EventData,
                           context: ContextTypes.DEFAULT_TYPE,
                           is_manager: bool):
-    worthy = is_manager and (
-            event.comment is not None or event.link is not None
-    )
     try:
         if event.link is not None:
             message = await context.bot.send_photo(
