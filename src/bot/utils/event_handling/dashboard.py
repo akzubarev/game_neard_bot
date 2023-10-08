@@ -7,14 +7,14 @@ from bot.utils import events_list_full, action_button
 from .admin import send_to_admin
 
 
-async def send_to_announces(context: ContextTypes.DEFAULT_TYPE, text,
-                            keyboard, parse_mode=None) -> int | None:
+async def send_to_about(context: ContextTypes.DEFAULT_TYPE, text,
+                        keyboard, parse_mode=None) -> int | None:
     message_id = None
     try:
         message_id = (await context.bot.send_message(
             chat_id=c.TELEGRAM_MAIN_GROUP, text=text,
             reply_markup=keyboard, parse_mode=parse_mode,
-            message_thread_id=c.TELEGRAM_SUPERGROUP_ID
+            message_thread_id=c.TELEGRAM_ABOUT_SUB_ID
         )).message_id
     except Exception as e:
         traceback.print_exc()
@@ -23,7 +23,7 @@ async def send_to_announces(context: ContextTypes.DEFAULT_TYPE, text,
 
 async def create_dashboard(context: ContextTypes.DEFAULT_TYPE):
     try:
-        announce_id = await send_to_announces(
+        announce_id = await send_to_about(
             context=context, parse_mode="html",
             text=await events_list_full(admin=False, group=True),
             keyboard=action_button(text="Записаться", command=c.SIGN_UP),
