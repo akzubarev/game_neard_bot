@@ -65,7 +65,7 @@ async def edit_announce(event: EventData, context: ContextTypes.DEFAULT_TYPE):
                 await context.bot.edit_message_caption(
                     chat_id=c.TELEGRAM_MAIN_GROUP,
                     message_id=event.announce_message,
-                    text=event.announce(admin=False),
+                    caption=event.announce(admin=False),
                     reply_markup=action_button(
                         text="Записаться", command=c.SIGN_UP
                     ),
