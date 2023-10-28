@@ -21,6 +21,11 @@ def ru_date(date_obj: date):
     return f"{days_dict.get(weekday)} {time}"
 
 
+def ru_weekday(date_obj: date):
+    weekday, _ = date_obj.strftime(STRF_WEEKDAY).split(" ")
+    return days_dict.get(weekday)
+
+
 def readable_time(time: datetime | date | timedelta,
                   show_date=False, seconds=True):
     res = ""

@@ -10,6 +10,7 @@ class EventAdmin(admin.ModelAdmin):
         'game',
         'time_fmt',
         'players_fmt',
+        'plus_ones_fmt',
         'initiator',
         'comment',
         'image',
@@ -25,6 +26,12 @@ class EventAdmin(admin.ModelAdmin):
     def players_fmt(self, obj):
         return format_html(
             "\n<br>".join([str(player) for player in obj.players.all()])
+        )
+
+    @admin.display(description="PlusOnes")
+    def plus_ones_fmt(self, obj):
+        return format_html(
+            "\n<br>".join([str(plus_one) for plus_one in obj.plus_ones.all()])
         )
 
     @admin.display(description='Time', ordering='time')

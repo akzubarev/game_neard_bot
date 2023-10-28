@@ -1,4 +1,5 @@
 from asgiref.sync import sync_to_async
+from django.db.models import Count
 
 from apps.users.models import User
 from bot.const import DEFAULT_PASSWORD
@@ -40,3 +41,18 @@ def create_user(tg_id: int, first_name: str, last_name: str, username: str):
         telegram_id=tg_id, username=username,
         password=DEFAULT_PASSWORD
     )
+
+
+@sync_to_async()
+def get_event_count(at_least_one=None):
+    event_count = User.objects.all().annotate(
+        event_count=Count("games")
+    ).order_by("-event_count")
+    if at_least_one is True:
+        event_count = event_count.filter(event_count__gt=0)
+    elif at_least_one is False:
+        event_count = event_count.filter(event_count=0)
+    return [
+        (data.get("username"), data.get("event_count"))
+        for data in event_count.values("username", "event_count")
+    ]

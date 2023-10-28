@@ -7,7 +7,7 @@ from django.db.models import Sum
 from django.utils.safestring import mark_safe
 
 from config.settings import TIME_ZONE
-from utils.time_str import STRF_DATE_TIME, STRF_TIME
+from utils.time_str import STRF_DATE_TIME, STRF_TIME, ru_weekday
 
 
 @dataclass
@@ -25,8 +25,9 @@ class EventData:
     link: str
 
     def simple_str(self):
+        weekday = ru_weekday(date_obj=self.time_tmz)
         game_time = self.time_tmz.strftime(STRF_DATE_TIME)
-        return f"{self.game_name} {game_time}"
+        return f"{self.game_name} - {weekday} {game_time}"
 
     def players_text(self):
         return '\n'.join([
@@ -105,14 +106,17 @@ class Event(models.Model):
     def time_tmz(self):
         return self.time.astimezone(ZoneInfo(TIME_ZONE))
 
-    def info(self, date=True):
+    def info(self, date=True, show_weekday=True):
         name = self.game.name
+        weekday = ru_weekday(date_obj=self.time_tmz)
         game_time = self.time_tmz.strftime(
             STRF_DATE_TIME if date is True else STRF_TIME
         )
         length = f"(~{self.game.expected_length_str()})"
         players = f"{self.get_player_count()}/{self.game.max_players} игроков"
         if date is True:
+            if show_weekday is True:
+                game_time = f"{weekday} {game_time}"
             res = f"{name} {game_time} {length} {players}"
         else:
             res = f"{game_time} {name} {players} {length}"

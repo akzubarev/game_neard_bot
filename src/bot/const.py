@@ -22,6 +22,7 @@ EVENTS = 'events'
 
 # Admin commands
 DASHBOARD = "dashboard"
+EVENT_COUNT = "event_count"
 
 # Texts
 CREATE_GAME_TEXT = f"для создания игры /{CREATE_GAME}"

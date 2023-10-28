@@ -56,6 +56,20 @@ async def send_dashboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await create_dashboard(context=context)
 
 
+@not_group
+@is_manager
+async def show_event_count(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    normal = await db.get_event_count(at_least_one=True)
+    zero = await db.get_event_count(at_least_one=False)
+    message = "\n".join([
+        "Количество посещений людей: ",
+        *[f"@{username} - {count}" for username, count in normal],
+        "", "Ни одного посещения:",
+        *[f"@{username}" for username, count in zero],
+    ])
+    await update.message.reply_text(message)
+
+
 async def help_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(update.message.chat_id)
     user_commands = [

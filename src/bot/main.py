@@ -28,7 +28,10 @@ def main():
     app.add_handler(CommandHandler(c.MY_GAMES, comm.my_games))
     app.add_handler(CommandHandler(c.GAME_LIST, comm.games_list))
     app.add_handler(CommandHandler(c.EVENTS, comm.events_list))
+
+    # Admin commands
     app.add_handler(CommandHandler(c.DASHBOARD, comm.send_dashboard))
+    app.add_handler(CommandHandler(c.EVENT_COUNT, comm.show_event_count))
 
     # Conversation
     app.add_handler(convo.get_sign_up_to_event_handler(), group=1)
