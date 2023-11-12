@@ -35,7 +35,7 @@ def main():
     # Admin commands
     app.add_handler(CommandHandler(c.DASHBOARD, comm.send_dashboard))
     app.add_handler(CommandHandler(c.EVENT_COUNT, comm.show_event_count))
-    app.add_handler(CommandHandler(c.delete_absent, comm.delete_absent))
+    app.add_handler(CommandHandler(c.DELETE_ABSENT, comm.delete_absent))
 
     # Conversation
     app.add_handler(convo.get_sign_up_to_event_handler(), group=1)
