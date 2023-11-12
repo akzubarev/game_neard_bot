@@ -73,8 +73,8 @@ async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     )
 
     await handle_event_change(
-        event=event, user=query_message.from_user,
-        join=False, context=context,
+        event=event, user=query_message.from_user, join=False,
+        chat_id=query_message.message.chat_id, context=context,
     )
 
     return ConversationHandler.END

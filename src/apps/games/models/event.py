@@ -45,17 +45,25 @@ class EventData:
     def other_event_info(self):
         return f"{self.simple_str()}\n{self.players_text()}"
 
-    def announce(self, admin=False):
+    def announce(self, admin=False, is_manager=False):
         if admin is True:
             return f"@{self.initiator} создал игру {self.full_event_info()}"
         else:
             if self.comment is not None:
-                return "\n\n".join([
-                    self.comment,
-                    f"@{self.initiator} создал игру {self.short_event_info()}",
-                ])
+                if is_manager is False:
+                    return "\n\n".join([
+                        self.comment,
+                        f"@{self.initiator} создал игру {self.short_event_info()}",
+                    ])
+                else:
+                    return "\n\n".join([
+                        self.comment, self.short_event_info()
+                    ])
             else:
-                return f"@{self.initiator} создал игру {self.short_event_info()}"
+                if is_manager is False:
+                    return f"@{self.initiator} создал игру {self.short_event_info()}"
+                else:
+                    return self.short_event_info()
 
     def photo_by_link(self):
         return mark_safe(f'<img src="/{self.link}" width="300" />')

@@ -23,9 +23,17 @@ class User(AbstractUser):
     )
 
     telegram_id = models.CharField(
-        max_length=50, verbose_name="Telegram ID",
+        max_length=50, verbose_name="Telegram UserID",
         blank=True, null=True
     )
+
+    telegram_chat_id = models.CharField(
+        max_length=50, verbose_name="Telegram ChatID",
+        blank=True, null=True
+    )
+
+    remind_hours = models.SmallIntegerField(default=2)
+    remind_enabled = models.BooleanField(default=True)
 
     def __str__(self):
         return str(self.username)

@@ -24,8 +24,10 @@ async def user_game_message(context: ContextTypes.DEFAULT_TYPE, username: str,
                             event: EventData, join: bool):
     try:
         if join is True:
-            # f"@{username} записался на {event.simple_str()}"
-            pass
+            await context.bot.send_message(
+                chat_id=c.TELEGRAM_ADMIN_GROUP,
+                text=f"@{username} записался на {event.simple_str()}"
+            )
         else:
             await context.bot.send_message(
                 chat_id=c.TELEGRAM_ADMIN_GROUP,

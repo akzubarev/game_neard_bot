@@ -19,10 +19,13 @@ LEAVE = 'leave_game'
 CREATE_GAME = 'create_game'
 MY_GAMES = 'my_games'
 EVENTS = 'events'
+ENABLE_NOTIFICATIONS = 'enable_notifications'
+DISABLE_NOTIFICATIONS = 'disable_notifications'
 
 # Admin commands
 DASHBOARD = "dashboard"
 EVENT_COUNT = "event_count"
+DELETE_ABSENT = "delete_absent"
 
 # Texts
 CREATE_GAME_TEXT = f"для создания игры /{CREATE_GAME}"

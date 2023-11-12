@@ -13,7 +13,7 @@ async def events_list_full(admin=False, group=False):
         ru_date(day): [
             event.short_event_info() if admin is False
             else event.full_event_info()
-            for event in await db.get_events(day=day)
+            for event in await db.get_events(day=day, filter_full=not admin)
         ] for day in upcoming_range
     }
 

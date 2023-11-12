@@ -17,7 +17,7 @@ async def create_announce(event: EventData,
             message = await context.bot.send_photo(
                 chat_id=c.TELEGRAM_MAIN_GROUP,
                 photo=open(event.link, 'rb'),
-                caption=event.announce(admin=False),
+                caption=event.announce(admin=False, is_manager=is_manager),
                 reply_markup=action_button(
                     text="Записаться", command=c.SIGN_UP, key=event.id
                 ), parse_mode=ParseMode.HTML,

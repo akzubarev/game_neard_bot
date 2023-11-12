@@ -19,7 +19,9 @@ def is_manager(func, *args, **kwargs):
 
 def logged_in(func, *args, **kwargs):
     async def wrapper(update: Update, *args, **kwargs):
-        user = await db.get_user(tg_id=update.message.from_user.id)
+        user = await db.get_user(
+            tg_id=update.message.from_user.id, chat_id=update.message.chat_id
+        )
         if user is not None:
             return await func(update, *args, **kwargs)
         else:

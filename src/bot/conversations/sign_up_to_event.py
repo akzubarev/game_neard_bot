@@ -30,7 +30,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_text(next_stage=EVENT,
                            task_data=context.user_data["event"]),
                 reply_markup=reply_keyboard(
-                    options=[[events[0]], *make_rectangle(events[1:])],
+                    options=[*make_rectangle(events, max_width=2)],
                     placeholder="Игра"
                 )
             )
@@ -91,8 +91,8 @@ async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             ), reply_markup=None
         )
         await handle_event_change(
-            event=event, user=query_message.from_user,
-            join=True, context=context,
+            event=event, user=query_message.from_user, join=True,
+            chat_id=query_message.message.chat_id, context=context,
         )
         return ConversationHandler.END
 
@@ -113,7 +113,8 @@ async def plus_one(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         ), reply_markup=None
     )
     await handle_event_change(
-        event=event, user=user, join=True, context=context,
+        event=event, user=user, join=True,
+        chat_id=update.message.chat_id, context=context,
     )
     return ConversationHandler.END
 

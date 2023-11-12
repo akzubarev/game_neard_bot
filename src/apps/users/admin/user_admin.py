@@ -12,6 +12,9 @@ class UserAdmin(BaseUserAdmin):
         'first_name',
         'last_name',
         'telegram_id',
+        'telegram_chat_id',
+        'remind_hours',
+        'remind_enabled',
         'groups_fmt'
     ]
 
@@ -20,6 +23,7 @@ class UserAdmin(BaseUserAdmin):
             'fields': [
                 'username',
                 'telegram_id',
+                'telegram_chat_id',
                 'is_superuser',
                 'is_staff',
                 'groups'
@@ -30,6 +34,8 @@ class UserAdmin(BaseUserAdmin):
             'fields': [
                 'first_name',
                 'last_name',
+                'remind_hours',
+                'remind_enabled',
             ]
         }
          ],

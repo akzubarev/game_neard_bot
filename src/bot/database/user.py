@@ -6,12 +6,41 @@ from bot.const import DEFAULT_PASSWORD
 
 
 @sync_to_async()
-def get_user(tg_id: int = None, username: str = None):
+def get_user(tg_id: int = None, chat_id: str = None, username: str = None):
+    return get_user_sync(tg_id=tg_id, chat_id=chat_id, username=username)
+
+
+@sync_to_async()
+def get_users():
+    return User.objects.all()
+
+
+def get_user_sync(tg_id: int = None, chat_id: int = None,
+                  username: str = None):
     user = None
     if tg_id is not None:
         user = User.objects.filter(telegram_id=str(tg_id)).first()
     elif username is not None:
         user = User.objects.filter(username=username).first()
+    if user.telegram_chat_id is None and chat_id is not None:
+        user.telegram_chat_id = chat_id
+        user.save()
+    return user
+
+
+@sync_to_async()
+def enable_notifier(tg_id: int = None, username: str = None):
+    user = get_user_sync(tg_id=tg_id, username=username)
+    user.remind_enabled = False
+    user.save()
+    return user
+
+
+@sync_to_async()
+def disable_notifier(tg_id: int = None, username: str = None):
+    user = get_user_sync(tg_id=tg_id, username=username)
+    user.remind_enabled = False
+    user.save()
     return user
 
 
@@ -56,3 +85,11 @@ def get_event_count(at_least_one=None):
         (data.get("username"), data.get("event_count"))
         for data in event_count.values("username", "event_count")
     ]
+
+
+@sync_to_async()
+def delete_zero():
+    users = User.objects.all().annotate(
+        event_count=Count("games")
+    ).order_by("-event_count").filter(event_count=0)
+    users.delete()

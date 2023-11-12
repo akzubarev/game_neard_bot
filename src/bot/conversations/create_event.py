@@ -57,25 +57,25 @@ async def date_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     ).replace(year=datetime.now().year)
     context.user_data["game"]["date_time"] = game_date_time
 
-    is_manager = await db.user_is_manager(tg_id=update.message.from_user.id)
-    if is_manager is True:
-        await update.message.reply_text(
-            text=reply_text(
-                next_stage=JOIN, task_data=context.user_data["game"]
-            ), reply_markup=reply_keyboard(
-                options=[[("Да", "Да"), ("Нет", "Нет")]],
-                placeholder="Присоединиться?",
-            )
+    # is_manager = await db.user_is_manager(tg_id=update.message.from_user.id)
+    # if is_manager is True:
+    await update.message.reply_text(
+        text=reply_text(
+            next_stage=JOIN, task_data=context.user_data["game"]
+        ), reply_markup=reply_keyboard(
+            options=[[("Да", "Да"), ("Нет", "Нет")]],
+            placeholder="Присоединиться?",
         )
-        return JOIN
-    else:
-        await save_task(context=context)
-        await update.message.reply_text(
-            reply_text(
-                next_stage=END, task_data=context.user_data["game"]
-            ), reply_markup=ReplyKeyboardRemove()
-        )
-        return ConversationHandler.END
+    )
+    return JOIN
+    # else:
+    #     await save_task(context=context)
+    #     await update.message.reply_text(
+    #         reply_text(
+    #             next_stage=END, task_data=context.user_data["game"]
+    #         ), reply_markup=ReplyKeyboardRemove()
+    #     )
+    #     return ConversationHandler.END
 
 
 async def join_game(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
