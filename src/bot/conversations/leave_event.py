@@ -33,7 +33,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             reply_text(next_stage=EVENT, task_data=context.user_data["event"]),
             reply_markup=reply_keyboard(
-                options=[*make_rectangle(events)], placeholder="Игра"
+                options=[*make_rectangle(events, max_width=1)],
+                placeholder="Игра"
             )
         )
     return EVENT
