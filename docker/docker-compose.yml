@@ -8,12 +8,11 @@ services:
       context: ..
       dockerfile: ./docker/Dockerfile
     container_name: gamenerd-admin
-#      sleep 3600 &&
     command: sh -c "
       python manage.py collectstatic --noinput &&
       python /deploy/startup/create_admin.py &&
       python manage.py runserver 0:8000"
-    env_file: ../.env.dev
+    env_file: ../.env.prod
     restart: always
     depends_on:
       - postgresql
@@ -35,7 +34,7 @@ services:
     restart: always
     depends_on:
       - postgresql
-    env_file: ../.env.dev
+    env_file: ../.env.prod
     volumes:
       - ../src:/app
     environment:
@@ -47,7 +46,7 @@ services:
     restart: always
     container_name: gamenerd-postgresql
     image: 'bitnami/postgresql:15'
-    env_file: ../.env.dev
+    env_file: ../.env.prod
     ports:
       - "7432:5432"
     volumes:
