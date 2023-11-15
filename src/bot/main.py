@@ -29,8 +29,6 @@ def main():
     app.add_handler(CommandHandler(c.MY_GAMES, comm.my_games))
     app.add_handler(CommandHandler(c.GAME_LIST, comm.games_list))
     app.add_handler(CommandHandler(c.EVENTS, comm.events_list))
-    app.add_handler(CommandHandler(c.EVENTS, comm.enable_notifications))
-    app.add_handler(CommandHandler(c.EVENTS, comm.disable_notifications))
 
     # Admin commands
     app.add_handler(CommandHandler(c.DASHBOARD, comm.send_dashboard))
@@ -42,6 +40,7 @@ def main():
     app.add_handler(convo.get_create_event_handler(), group=2)
     app.add_handler(convo.get_leave_event_handler(), group=3)
     app.add_handler(convo.get_registration_handler(), group=4)
+    app.add_handler(convo.get_edit_notifications_handler(), group=5)
 
     # Messages
     # for group in range(1, 5):

@@ -22,25 +22,9 @@ def get_user_sync(tg_id: int = None, chat_id: int = None,
         user = User.objects.filter(telegram_id=str(tg_id)).first()
     elif username is not None:
         user = User.objects.filter(username=username).first()
-    if user.telegram_chat_id is None and chat_id is not None:
+    if user is not None and user.telegram_chat_id is None and chat_id is not None:
         user.telegram_chat_id = chat_id
         user.save()
-    return user
-
-
-@sync_to_async()
-def enable_notifier(tg_id: int = None, username: str = None):
-    user = get_user_sync(tg_id=tg_id, username=username)
-    user.remind_enabled = False
-    user.save()
-    return user
-
-
-@sync_to_async()
-def disable_notifier(tg_id: int = None, username: str = None):
-    user = get_user_sync(tg_id=tg_id, username=username)
-    user.remind_enabled = False
-    user.save()
     return user
 
 
@@ -93,3 +77,27 @@ def delete_zero():
         event_count=Count("games")
     ).order_by("-event_count").filter(event_count=0)
     users.delete()
+
+
+@sync_to_async()
+def enable_notifier(tg_id: int = None, username: str = None):
+    user = get_user_sync(tg_id=tg_id, username=username)
+    user.remind_enabled = True
+    user.save()
+    return user
+
+
+@sync_to_async()
+def disable_notifier(tg_id: int = None, username: str = None):
+    user = get_user_sync(tg_id=tg_id, username=username)
+    user.remind_enabled = False
+    user.save()
+    return user
+
+
+@sync_to_async()
+def change_remind_hours(hours: int, tg_id: int = None, username: str = None):
+    user = get_user_sync(tg_id=tg_id, username=username)
+    user.remind_hours = hours
+    user.save()
+    return user

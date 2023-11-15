@@ -19,8 +19,7 @@ LEAVE = 'leave_game'
 CREATE_GAME = 'create_game'
 MY_GAMES = 'my_games'
 EVENTS = 'events'
-ENABLE_NOTIFICATIONS = 'enable_notifications'
-DISABLE_NOTIFICATIONS = 'disable_notifications'
+EDIT_NOTIFICATIONS = 'edit_notifications'
 
 # Admin commands
 DASHBOARD = "dashboard"

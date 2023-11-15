@@ -3,7 +3,6 @@ from telegram.ext import ContextTypes
 
 import bot.const as c
 import bot.database as db
-import bot.jobs as j
 from bot.utils import logged_in, is_manager, events_list_full, not_group
 from bot.utils.event_handling.dashboard import create_dashboard
 
@@ -29,44 +28,6 @@ async def my_games(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"Вы записаны на следующие игры: ",
             *[event.other_event_info() for event in events]
         ])  # ), parse_mode="MarkdownV2"
-    )
-
-
-@not_group
-@logged_in
-async def disable_notifications(update: Update,
-                                context: ContextTypes.DEFAULT_TYPE):
-    await db.disable_notifier(tg_id=update.message.from_user.id)
-    await j.remove_reminders(
-        chat_id=update.message.chat_id, context=context
-    )
-    await update.message.reply_text(
-        "\n".join([
-            f"Больше не будет напоминать об играх",
-            f"Для того чтобы включить оповещения обратно /{c.ENABLE_NOTIFICATIONS}"
-        ])
-    )
-
-
-@not_group
-@logged_in
-async def enable_notifications(update: Update,
-                               context: ContextTypes.DEFAULT_TYPE):
-    tg_id = update.message.from_user.id
-    user = await db.enable_notifier(tg_id=tg_id)
-    h_str = 'чаcов' if user.remind_hours > 5 else (
-        'чаcа' if user.remind_hours > 1 else 'час'
-    )
-    for event in await db.get_events(telegram_id=tg_id):
-        await j.set_reminder(
-            user_id=tg_id, event=event, delay=user.remind_hours,
-            chat_id=update.message.chat_id, context=context
-        )
-    await update.message.reply_text(
-        "\n".join([
-            f"Напомним о записи за {user.remind_hours} {h_str} до игры",
-            f"Для того чтобы отключить оповещения /{c.DISABLE_NOTIFICATIONS}"
-        ])
     )
 
 

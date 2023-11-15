@@ -2,6 +2,7 @@ import datetime
 import traceback
 
 import bot.database as db
+import bot.const as c
 from django.utils.timezone import make_aware
 from telegram.ext import ContextTypes
 from apps.games.models import EventData
@@ -21,7 +22,8 @@ async def notify_user(context: ContextTypes.DEFAULT_TYPE) -> None:
             job.chat_id,
             text="\n\n".join([
                 "Напоминаем о том, что вы записаны на игру",
-                event.other_event_info()
+                event.other_event_info(),
+                f"Чтобы отключить или изменить время напоминаний - /{c.EDIT_NOTIFICATIONS}"
             ])
         )
 

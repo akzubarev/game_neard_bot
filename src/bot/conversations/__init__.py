@@ -2,3 +2,4 @@ from .registration import get_registration_handler
 from .create_event import get_create_event_handler
 from .sign_up_to_event import get_sign_up_to_event_handler
 from .leave_event import get_leave_event_handler
+from .edit_notifications import get_edit_notifications_handler
