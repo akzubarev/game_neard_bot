@@ -50,9 +50,8 @@ async def create_dashboard(context: ContextTypes.DEFAULT_TYPE):
         traceback.print_exc()
 
 
-async def edit_dashboard(context: ContextTypes.DEFAULT_TYPE, new_game=False):
+async def edit_create_announces_dashboard(dashboard, new_game, context):
     try:
-        dashboard = await db.get_dashboard()
         if dashboard.announce_message is None or new_game is True:
             if dashboard.announce_message is not None:
                 try:
@@ -75,14 +74,21 @@ async def edit_dashboard(context: ContextTypes.DEFAULT_TYPE, new_game=False):
                 )
             except Exception as e:
                 traceback.print_exc()
-            try:
-                await context.bot.edit_message_text(
-                    chat_id=c.TELEGRAM_ADMIN_GROUP,
-                    message_id=dashboard.admin_message,
-                    text=await events_list_full(admin=True, group=True),
-                    parse_mode="html"
-                )
-            except Exception as e:
-                traceback.print_exc()
+    except Exception as e:
+        traceback.print_exc()
+
+
+async def edit_dashboard(context: ContextTypes.DEFAULT_TYPE, new_game=False):
+    dashboard = await db.get_dashboard()
+    await edit_create_announces_dashboard(
+        dashboard=dashboard, new_game=new_game, context=context
+    )
+    try:
+        await context.bot.edit_message_text(
+            chat_id=c.TELEGRAM_ADMIN_GROUP,
+            message_id=dashboard.admin_message,
+            text=await events_list_full(admin=True, group=True),
+            parse_mode="html"
+        )
     except Exception as e:
         traceback.print_exc()
