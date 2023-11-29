@@ -4,7 +4,8 @@ from telegram.ext import ContextTypes
 import bot.const as c
 import bot.database as db
 from bot.utils import logged_in, is_manager, events_list_full, not_group
-from bot.utils.event_handling.dashboard import create_dashboard
+from bot.utils.event_handling.dashboard import create_dashboard_announce, \
+    create_dashboard_admin
 
 
 @not_group
@@ -49,7 +50,8 @@ async def games_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @not_group
 @is_manager
 async def send_dashboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await create_dashboard(context=context)
+    await create_dashboard_announce(context=context)
+    await create_dashboard_admin(context=context)
 
 
 @not_group

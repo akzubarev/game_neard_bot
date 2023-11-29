@@ -21,7 +21,7 @@ async def send_to_about(context: ContextTypes.DEFAULT_TYPE, text,
     return message_id
 
 
-async def create_dashboard(context: ContextTypes.DEFAULT_TYPE):
+async def create_dashboard_announce(context: ContextTypes.DEFAULT_TYPE):
     try:
         announce_id = await send_to_about(
             context=context, parse_mode="html",
@@ -36,6 +36,8 @@ async def create_dashboard(context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         traceback.print_exc()
 
+
+async def create_dashboard_admin(context: ContextTypes.DEFAULT_TYPE):
     try:
         message_admin_id = await send_to_admin(
             context=context, keyboard=None, parse_mode="html",
@@ -61,7 +63,7 @@ async def edit_create_announces_dashboard(dashboard, new_game, context):
                     )
                 except Exception as e:
                     traceback.print_exc()
-            await create_dashboard(context=context)
+            await create_dashboard_announce(context=context)
         else:
             try:
                 await context.bot.edit_message_text(
@@ -92,3 +94,11 @@ async def edit_dashboard(context: ContextTypes.DEFAULT_TYPE, new_game=False):
         )
     except Exception as e:
         traceback.print_exc()
+        try:
+            await context.bot.delete_message(
+                chat_id=c.TELEGRAM_ADMIN_GROUP,
+                message_id=dashboard.announce_message,
+            )
+        except Exception as e:
+            traceback.print_exc()
+        await create_dashboard_admin(context)
