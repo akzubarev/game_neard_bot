@@ -1,7 +1,9 @@
 import os
+import traceback
 from datetime import datetime
 
 from telegram import Update, ReplyKeyboardRemove
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, \
     MessageHandler, filters, CallbackQueryHandler
 
@@ -30,7 +32,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_keyboard(
             options=make_rectangle(games, max_width=2),
             placeholder="Игра"
-        )
+        ), parse_mode=ParseMode.HTML,
     )
     return GAME
 
@@ -45,7 +47,7 @@ async def game(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await query_message.edit_message_text(
         text=reply_text(
             next_stage=DATETIME, task_data=context.user_data["game"]
-        ), reply_markup=None
+        ), reply_markup=None, parse_mode=ParseMode.HTML,
     )
     return DATETIME
 
@@ -65,7 +67,7 @@ async def date_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         ), reply_markup=reply_keyboard(
             options=[[("Да", "Да"), ("Нет", "Нет")]],
             placeholder="Присоединиться?",
-        )
+        ), parse_mode=ParseMode.HTML,
     )
     return JOIN
     # else:
@@ -74,7 +76,7 @@ async def date_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     #         reply_text(
     #             next_stage=END, task_data=context.user_data["game"]
     #         ), reply_markup=ReplyKeyboardRemove()
-    #     )
+    #     ), parse_mode=ParseMode.HTML,
     #     return ConversationHandler.END
 
 
@@ -88,7 +90,7 @@ async def join_game(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             next_stage=COMMENT, task_data=context.user_data["game"]
         ), reply_markup=reply_keyboard(
             options=[[("Пропустить", None)]], placeholder="Комментарий",
-        )
+        ), parse_mode=ParseMode.HTML,
     )
     return COMMENT
 
@@ -103,27 +105,29 @@ async def save_image(image, name: str, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def comment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    if update.message.text is not None:
-        comment_text = update.message.text.strip()
-        context.user_data["game"]["comment"] = comment_text
+    try:
+        if update.message.text is not None:
+            context.user_data["game"]["comment"] = update.message.text_html
 
-    if len(update.message.photo) > 0:
-        comment_text = update.message.caption.strip()
-        photo_file = await update.message.photo[-1].get_file()
-        context.user_data["game"]["comment"] = comment_text
-        path = await save_image(
-            image=photo_file, context=context,
-            name=context.user_data["game"]["game_name"],
+        if len(update.message.photo) > 0:
+            photo_file = await update.message.photo[-1].get_file()
+            context.user_data["game"]["comment"] = update.message.caption_html
+            path = await save_image(
+                image=photo_file, context=context,
+                name=context.user_data["game"]["game_name"],
+            )
+            context.user_data["game"]["link"] = path
+
+        await save_task(context=context)
+        await update.message.reply_text(
+            reply_text(
+                next_stage=END, task_data=context.user_data["game"]
+            ), reply_markup=ReplyKeyboardRemove(), parse_mode=ParseMode.HTML,
+
         )
-        context.user_data["game"]["link"] = path
-
-    await save_task(context=context)
-    await update.message.reply_text(
-        reply_text(
-            next_stage=END, task_data=context.user_data["game"]
-        ), reply_markup=ReplyKeyboardRemove()
-    )
-    return ConversationHandler.END
+        return ConversationHandler.END
+    except Exception as e:
+        traceback.print_exc()
 
 
 async def skip_comment(update: Update,
@@ -134,13 +138,13 @@ async def skip_comment(update: Update,
         await update.callback_query.edit_message_text(
             reply_text(
                 next_stage=END, task_data=context.user_data["game"]
-            ), reply_markup=None
+            ), reply_markup=None, parse_mode=ParseMode.HTML,
         )
     else:
         await update.message.reply_text(
             reply_text(
                 next_stage=END, task_data=context.user_data["game"]
-            ), reply_markup=ReplyKeyboardRemove()
+            ), reply_markup=ReplyKeyboardRemove(), parse_mode=ParseMode.HTML,
         )
     return ConversationHandler.END
 
@@ -148,7 +152,7 @@ async def skip_comment(update: Update,
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text(
         f"Запись отменена, {c.CREATE_GAME_TEXT}",
-        reply_markup=ReplyKeyboardRemove()
+        reply_markup=ReplyKeyboardRemove(), parse_mode=ParseMode.HTML,
     )
     return ConversationHandler.END
 

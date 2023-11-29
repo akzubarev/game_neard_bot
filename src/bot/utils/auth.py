@@ -26,7 +26,7 @@ def logged_in(func, *args, **kwargs):
             return await func(update, *args, **kwargs)
         else:
             return await update.message.reply_text(
-                f"Вас нет в нашей базе, для регистрации: /{c.START_REGISTRATION}"
+                f"Вас нет в нашей базе, для регистрации: /start"
             )
 
     return wrapper
