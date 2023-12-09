@@ -59,7 +59,7 @@ async def edit_announce(event: EventData, context: ContextTypes.DEFAULT_TYPE):
                     text=event.announce(admin=False),
                     reply_markup=action_button(
                         text="Записаться", command=c.SIGN_UP
-                    ),
+                    ), parse_mode=ParseMode.HTML,
                 )
             else:
                 await context.bot.edit_message_caption(
@@ -68,7 +68,7 @@ async def edit_announce(event: EventData, context: ContextTypes.DEFAULT_TYPE):
                     caption=event.announce(admin=False),
                     reply_markup=action_button(
                         text="Записаться", command=c.SIGN_UP
-                    ),
+                    ), parse_mode=ParseMode.HTML,
                 )
         elif event.announce_message is not None:
             try:
@@ -87,6 +87,7 @@ async def edit_announce(event: EventData, context: ContextTypes.DEFAULT_TYPE):
             chat_id=c.TELEGRAM_ADMIN_GROUP,
             message_id=event.admin_message,
             text=event.announce(admin=True),
+            parse_mode=ParseMode.HTML,
         )
     except Exception as e:
         traceback.print_exc()
