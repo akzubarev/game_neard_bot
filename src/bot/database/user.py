@@ -57,6 +57,14 @@ def create_user(tg_id: int, first_name: str, last_name: str, username: str):
 
 
 @sync_to_async()
+def get_user_event_count(tg_id: int):
+    event_count = User.objects.filter(tg_id=tg_id).annotate(
+        event_count=Count("games")
+    ).order_by("-event_count").values("username", "event_count")[0]
+    return event_count.get("event_count")
+
+
+@sync_to_async()
 def get_event_count(at_least_one=None):
     event_count = User.objects.all().annotate(
         event_count=Count("games")
