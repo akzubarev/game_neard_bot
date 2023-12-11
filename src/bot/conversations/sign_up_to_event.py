@@ -20,9 +20,11 @@ logger = LogHelper().logger
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         context.user_data["event"] = dict()
-        context.user_data["user"]["games"] = await db.get_user_event_count(
-            tg_id=update.message.from_user.id
-        )
+        context.user_data["user"] = {
+            "games": await db.get_user_event_count(
+                tg_id=update.message.from_user.id
+            )
+        }
         events = [(event.simple_str(), event.id) for event in
                   await db.get_events(
                       filter_full=True, exclude=True,
