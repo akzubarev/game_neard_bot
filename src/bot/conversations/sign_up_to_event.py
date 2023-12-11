@@ -20,6 +20,9 @@ logger = LogHelper().logger
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         context.user_data["event"] = dict()
+        context.user_data["user"]["games"] = await db.get_user_event_count(
+            tg_id=update.message.from_user.id
+        )
         events = [(event.simple_str(), event.id) for event in
                   await db.get_events(
                       filter_full=True, exclude=True,
@@ -57,9 +60,8 @@ async def event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await query_message.edit_message_text(
         text=reply_text(
             next_stage=CONFIRM, task_data=context.user_data["event"],
-            at_least_one_game=(await db.get_user_event_count(
-                tg_id=query_message.from_user.id
-            )) > 0), reply_markup=reply_keyboard(
+            at_least_one_game=context.user_data["user"]["games"] > 0
+        ), reply_markup=reply_keyboard(
             [[("Записаться одному", None),
               ("Записаться с друзьями", "PLUS_ONE")]],
             placeholder="Записаться"
@@ -76,9 +78,8 @@ async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await query_message.edit_message_text(
             text=reply_text(
                 next_stage=PLUS_ONE, task_data=context.user_data["event"],
-                at_least_one_game=(await db.get_user_event_count(
-                    tg_id=query_message.from_user.id
-                )) > 0), reply_markup=reply_keyboard(
+                at_least_one_game=context.user_data["user"]["games"] > 0
+            ), reply_markup=reply_keyboard(
                 [[("Пропустить", None)]], placeholder="Пропустить"
             )
         )
@@ -92,9 +93,8 @@ async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await query_message.edit_message_text(
             text=reply_text(
                 next_stage=END, task_data=context.user_data["event"],
-                at_least_one_game=(await db.get_user_event_count(
-                    tg_id=query_message.from_user.id
-                )) > 0), reply_markup=None
+                at_least_one_game=context.user_data["user"]["games"] > 0
+            ), reply_markup=None
         )
         await handle_event_change(
             event=event, user=query_message.from_user, join=True,
@@ -116,9 +116,8 @@ async def plus_one(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text(
         text=reply_text(
             next_stage=END, task_data=context.user_data["event"],
-            at_least_one_game=(await db.get_user_event_count(
-                tg_id=user.id
-            )) > 0), reply_markup=None
+            at_least_one_game=context.user_data["user"]["games"] > 0
+        ), reply_markup=None
     )
     await handle_event_change(
         event=event, user=user, join=True,
@@ -146,13 +145,13 @@ def reply_text(next_stage: int, task_data: dict, at_least_one_game=True):
         reply_str.append(f"Игра: {task_data.get('event_descr')}")
 
     if next_stage == CONFIRM:
-        if at_least_one_game:
+        if at_least_one_game is True:
             reply_str.extend([
                 f"Игроки: {task_data.get('players')}", "Записываем?",
             ])
         else:
             reply_str.extend(["Записываем?", ])
-    elif next_stage > CONFIRM and at_least_one_game:
+    elif next_stage > CONFIRM and at_least_one_game is True:
         reply_str.append(f"Игроки: {task_data.get('players')}")
 
     if next_stage == PLUS_ONE:
