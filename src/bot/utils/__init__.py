@@ -1,4 +1,4 @@
-from .auth import logged_in, is_manager, not_group
+from .auth import logged_in, is_manager, not_group, can_see_players
 from .events import events_list_full
 from .keyboards import reply_keyboard, make_rectangle, make_column, \
     action_button

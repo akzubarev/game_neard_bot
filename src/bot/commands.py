@@ -3,8 +3,8 @@ from telegram.ext import ContextTypes
 
 import bot.const as c
 import bot.database as db
-from bot.utils import logged_in, is_manager, events_list_full, not_group
-from bot.utils.auth import banned
+from bot.utils import logged_in, is_manager, events_list_full, not_group, \
+    can_see_players
 from bot.utils.event_handling.dashboard import create_dashboard_announce, \
     create_dashboard_admin
 
@@ -21,27 +21,25 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Добрый день")
 
 
-@banned
 @not_group
 @logged_in
 async def my_games(update: Update, context: ContextTypes.DEFAULT_TYPE):
     events = await db.get_events(telegram_id=update.message.from_user.id)
+    show_players = can_see_players(update.message.from_user.id, context)
     await update.message.reply_text(  # apply_markdown(
         "\n\n".join([
             f"Вы записаны на следующие игры: ",
-            *[event.other_event_info() for event in events]
+            *[event.other_event_info(show_players=show_players)
+              for event in events]
         ])  # ), parse_mode="MarkdownV2"
     )
 
 
-@banned
 async def events_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
     events_text = await events_list_full(admin=False)
     await update.message.reply_text(events_text, parse_mode="html")
 
 
-@banned
-@banned
 async def games_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
     games = await db.get_games(linked=True)
     await update.message.reply_text(
@@ -81,7 +79,6 @@ async def delete_absent(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Сделано")
 
 
-@banned
 async def help_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(update.message.chat_id)
     user_commands = [

@@ -10,6 +10,7 @@ TELEGRAM_ABOUT_SUB_ID = os.getenv('TELEGRAM_ABOUT_SUB_ID')  # О нас
 DEFAULT_PASSWORD = 'rI2UsV96txrOkaLqBlS6'
 UPCOMING_RANGE = 14
 CONVERSATION_TIMOUT = 60 * 60
+ENTRY_POINT = 3  # Игры чтобы видеть других игроков
 
 # User commands
 START_REGISTRATION = 'register'

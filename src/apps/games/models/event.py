@@ -42,8 +42,11 @@ class EventData:
     def full_event_info(self):
         return f"{self.info}\n{self.players_text()}"
 
-    def other_event_info(self):
-        return f"{self.simple_str()}\n{self.players_text()}"
+    def other_event_info(self, show_players=True):
+        res = self.simple_str()
+        if show_players:
+            res += f"\n{self.players_text()}"
+        return res
 
     def announce(self, admin=False, is_manager=False):
         if admin is True:

@@ -8,7 +8,7 @@ import bot.const as c
 import bot.database as db
 from bot.utils import reply_keyboard, make_rectangle, logged_in, \
     handle_event_change
-from bot.utils.auth import not_group, banned
+from bot.utils.auth import not_group, banned, can_see_players
 from config.logging import LogHelper
 
 EVENT, CONFIRM, PLUS_ONE, END = range(4)
@@ -63,7 +63,9 @@ async def event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await query_message.edit_message_text(
         text=reply_text(
             next_stage=CONFIRM, task_data=context.user_data["event"],
-            at_least_one_game=context.user_data["user"]["games"] > 0
+            can_see_players=await can_see_players(
+                query_message.from_user.id, context
+            )
         ), reply_markup=reply_keyboard(
             [[("Записаться одному", None),
               ("Записаться с друзьями", "PLUS_ONE")]],
@@ -82,7 +84,9 @@ async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await query_message.edit_message_text(
             text=reply_text(
                 next_stage=PLUS_ONE, task_data=context.user_data["event"],
-                at_least_one_game=context.user_data["user"]["games"] > 0
+                can_see_players=await can_see_players(
+                    query_message.from_user.id, context
+                )
             ), reply_markup=reply_keyboard(
                 [[("Пропустить", None)]], placeholder="Пропустить"
             )
@@ -97,7 +101,9 @@ async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await query_message.edit_message_text(
             text=reply_text(
                 next_stage=END, task_data=context.user_data["event"],
-                at_least_one_game=context.user_data["user"]["games"] > 0
+                can_see_players=await can_see_players(
+                    query_message.from_user.id, context
+                )
             ), reply_markup=None
         )
         await handle_event_change(
@@ -120,7 +126,7 @@ async def plus_one(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text(
         text=reply_text(
             next_stage=END, task_data=context.user_data["event"],
-            at_least_one_game=context.user_data["user"]["games"] > 0
+            can_see_players=await can_see_players(user.id, context)
         ), reply_markup=None
     )
     await handle_event_change(
@@ -137,7 +143,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return ConversationHandler.END
 
 
-def reply_text(next_stage: int, task_data: dict, at_least_one_game=True):
+def reply_text(next_stage: int, task_data: dict, can_see_players=True):
     reply_str = list()
     if next_stage == EVENT:
         reply_str.extend([
@@ -149,13 +155,13 @@ def reply_text(next_stage: int, task_data: dict, at_least_one_game=True):
         reply_str.append(f"Игра: {task_data.get('event_descr')}")
 
     if next_stage == CONFIRM:
-        if at_least_one_game is True:
+        if can_see_players is True:
             reply_str.extend([
                 f"Игроки: {task_data.get('players')}", "Записываем?",
             ])
         else:
             reply_str.extend(["Записываем?", ])
-    elif next_stage > CONFIRM and at_least_one_game is True:
+    elif next_stage > CONFIRM and can_see_players is True:
         reply_str.append(f"Игроки: {task_data.get('players')}")
 
     if next_stage == PLUS_ONE:

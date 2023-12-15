@@ -1,4 +1,5 @@
 from telegram import Update
+from telegram.ext import ContextTypes
 
 import bot.const as c
 import bot.database as db
@@ -70,3 +71,10 @@ def banned(func, *args, **kwargs):
             )
 
     return wrapper
+
+
+async def can_see_players(user_id, context: ContextTypes.DEFAULT_TYPE):
+    user = await db.get_user(tg_id=user_id)
+    return (not user.banned) and context.user_data["user"][
+        "games"] > c.ENTRY_POINT
+
