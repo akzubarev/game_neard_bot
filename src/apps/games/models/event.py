@@ -44,7 +44,7 @@ class EventData:
 
     def other_event_info(self, show_players=True):
         res = self.simple_str()
-        if show_players:
+        if show_players is True:
             res += f"\n{self.players_text()}"
         return res
 

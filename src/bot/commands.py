@@ -25,7 +25,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @logged_in
 async def my_games(update: Update, context: ContextTypes.DEFAULT_TYPE):
     events = await db.get_events(telegram_id=update.message.from_user.id)
-    show_players = can_see_players(update.message.from_user.id, context)
+    show_players = await can_see_players(update.message.from_user.id, context)
     await update.message.reply_text(  # apply_markdown(
         "\n\n".join([
             f"Вы записаны на следующие игры: ",
