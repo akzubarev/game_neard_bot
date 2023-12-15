@@ -50,7 +50,7 @@ def banned(func, *args, **kwargs):
             tg_id=update.message.from_user.id, chat_id=update.message.chat_id
         )
         if user is not None:
-            if user.banned is False:
+            if user.ban is False:
                 return await func(update, *args, **kwargs)
             else:
                 return await update.message.reply_text(
