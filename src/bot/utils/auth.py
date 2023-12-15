@@ -42,3 +42,23 @@ def not_group(func, *args, **kwargs):
             return await func(update, *args, **kwargs)
 
     return wrapper
+
+
+def banned(func, *args, **kwargs):
+    async def wrapper(update: Update, *args, **kwargs):
+        user = await db.get_user(
+            tg_id=update.message.from_user.id, chat_id=update.message.chat_id
+        )
+        if user is not None:
+            if user.banned is False:
+                return await func(update, *args, **kwargs)
+            else:
+                return await update.message.reply_text(
+                    f"Вы были забанены за подозрительное поведение, команды для вас недоступны"
+                )
+        else:
+            return await update.message.reply_text(
+                f"Вас нет в нашей базе bkb, для регистрации: /start"
+            )
+
+    return wrapper

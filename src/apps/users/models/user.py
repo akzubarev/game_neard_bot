@@ -35,5 +35,7 @@ class User(AbstractUser):
     remind_hours = models.SmallIntegerField(default=2)
     remind_enabled = models.BooleanField(default=True)
 
+    ban = models.BooleanField(default=False)
+
     def __str__(self):
         return str(self.username)

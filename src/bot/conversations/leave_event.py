@@ -6,7 +6,7 @@ import bot.const as c
 import bot.database as db
 from bot.utils import reply_keyboard, make_rectangle, logged_in, \
     handle_event_change
-from bot.utils.auth import not_group
+from bot.utils.auth import not_group, banned
 from config.logging import LogHelper
 
 EVENT, CONFIRM, END = range(3)
@@ -15,6 +15,7 @@ logger = LogHelper().logger
 strf_format = '%d.%m.%Y %H:%M'
 
 
+@banned
 @not_group
 @logged_in
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):

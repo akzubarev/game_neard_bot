@@ -11,11 +11,12 @@ class UserAdmin(BaseUserAdmin):
         'username',
         'first_name',
         'last_name',
+        'ban',
         'telegram_id',
         'telegram_chat_id',
         'remind_hours',
         'remind_enabled',
-        'groups_fmt'
+        'groups_fmt',
     ]
 
     fieldsets = [
@@ -26,6 +27,7 @@ class UserAdmin(BaseUserAdmin):
                 'telegram_chat_id',
                 'is_superuser',
                 'is_staff',
+                'ban',
                 'groups'
             ]
         }

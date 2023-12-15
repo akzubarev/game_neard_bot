@@ -8,13 +8,14 @@ import bot.const as c
 import bot.database as db
 from bot.utils import reply_keyboard, make_rectangle, logged_in, \
     handle_event_change
-from bot.utils.auth import not_group
+from bot.utils.auth import not_group, banned
 from config.logging import LogHelper
 
 EVENT, CONFIRM, PLUS_ONE, END = range(4)
 logger = LogHelper().logger
 
 
+@banned
 @not_group
 @logged_in
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):

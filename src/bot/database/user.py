@@ -81,7 +81,7 @@ def get_event_count(at_least_one=None):
 
 @sync_to_async()
 def delete_zero():
-    users = User.objects.all().annotate(
+    users = User.objects.filter(ban=False).annotate(
         event_count=Count("games")
     ).order_by("-event_count").filter(event_count=0)
     users.delete()

@@ -11,7 +11,7 @@ import bot.const as c
 import bot.database as db
 from bot.utils import reply_keyboard, make_rectangle, logged_in, \
     handle_event_create
-from bot.utils.auth import not_group
+from bot.utils.auth import not_group, banned
 from config.logging import LogHelper
 from utils.time_str import STRF_DATE_TIME
 
@@ -19,6 +19,7 @@ GAME, DATETIME, JOIN, COMMENT, END = range(5)
 logger = LogHelper().logger
 
 
+@banned
 @not_group
 @logged_in
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
