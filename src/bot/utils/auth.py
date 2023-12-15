@@ -52,13 +52,13 @@ def banned(func, *args, **kwargs):
         if user is not None:
             if user.ban is False:
                 return await func(update, *args, **kwargs)
-            else:
-                return await update.message.reply_text(
-                    f"Вы были забанены за подозрительное поведение, команды для вас недоступны"
-                )
+            # else:
+            # return await update.message.reply_text(
+            #     f"Вы были забанены за подозрительное поведение, команды для вас недоступны"
+            # )
         else:
             return await update.message.reply_text(
-                f"Вас нет в нашей базе bkb, для регистрации: /start"
+                f"Вас нет в нашей базе, для регистрации: /start"
             )
 
     return wrapper
