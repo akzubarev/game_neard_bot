@@ -15,7 +15,7 @@ logger = LogHelper().logger
 strf_format = '%d.%m.%Y %H:%M'
 
 
-@banned
+# @banned
 @not_group
 @logged_in
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):

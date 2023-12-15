@@ -19,7 +19,6 @@ GAME, DATETIME, JOIN, COMMENT, END = range(5)
 logger = LogHelper().logger
 
 
-@banned
 @not_group
 @logged_in
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -105,6 +104,7 @@ async def save_image(image, name: str, context: ContextTypes.DEFAULT_TYPE):
     return path
 
 
+@banned
 async def comment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         if update.message.text is not None:

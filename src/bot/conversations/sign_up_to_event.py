@@ -15,7 +15,7 @@ EVENT, CONFIRM, PLUS_ONE, END = range(4)
 logger = LogHelper().logger
 
 
-@banned
+# @banned
 @not_group
 @logged_in
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -73,6 +73,7 @@ async def event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return CONFIRM
 
 
+@banned
 async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query_message = update.callback_query
     await query_message.answer()
