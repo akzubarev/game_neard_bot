@@ -14,11 +14,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tg_id = update.message.from_user.id
     user = await db.get_user(tg_id=tg_id)
     if user is None:
-        await db.create_user(
-            tg_id=tg_id, first_name=None, last_name=None,
-            username=update.message.from_user.username
-        )
-    await update.message.reply_text("Добрый день")
+        username = update.message.from_user.username
+        if username is not None:
+            await db.create_user(
+                tg_id=tg_id, username=username,
+                first_name=None, last_name=None
+            )
+            await update.message.reply_text("Добрый день")
+        else:
+            await update.message.reply_text(
+                "Юзернейм не определен. Установите юзернейм в настройках пользователя, чтобы зарегистрироваться в боте"
+            )
+    else:
+        await update.message.reply_text("Добрый день")
 
 
 @not_group

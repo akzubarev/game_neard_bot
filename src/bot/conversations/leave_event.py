@@ -6,7 +6,7 @@ import bot.const as c
 import bot.database as db
 from bot.utils import reply_keyboard, make_rectangle, logged_in, \
     handle_event_change
-from bot.utils.auth import not_group, banned
+from bot.utils.auth import not_group, banned, can_see_players
 from config.logging import LogHelper
 
 EVENT, CONFIRM, END = range(3)
@@ -51,7 +51,10 @@ async def event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     context.user_data["event"]["players"] = event.players_text()
     await query_message.edit_message_text(
         text=reply_text(
-            next_stage=CONFIRM, task_data=context.user_data["event"]
+            next_stage=CONFIRM, task_data=context.user_data["event"],
+            can_see_players=await can_see_players(
+                query_message.from_user.id, context
+            )
         ), reply_markup=reply_keyboard(
             [[("Покинуть игру", None)]], placeholder="Покинуть игру"
         )
@@ -70,7 +73,10 @@ async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     await query_message.edit_message_text(
         text=reply_text(
-            next_stage=END, task_data=context.user_data["event"]
+            next_stage=END, task_data=context.user_data["event"],
+            can_see_players=await can_see_players(
+                query_message.from_user.id, context
+            )
         ), reply_markup=None
     )
 
@@ -90,7 +96,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return ConversationHandler.END
 
 
-def reply_text(next_stage: int, task_data: dict):
+def reply_text(next_stage: int, task_data: dict, can_see_players: bool = True):
     reply_str = list()
     if next_stage == EVENT:
         reply_str.append("Выберите игру:")
@@ -98,10 +104,9 @@ def reply_text(next_stage: int, task_data: dict):
         reply_str.append(f"Игра: {task_data.get('event_descr')}")
 
     if next_stage == CONFIRM:
-        reply_str.extend([
-            f"Игроки: {task_data.get('players')}",
-            "Покинуть игру?",
-        ])
+        if can_see_players is True:
+            reply_str.append(f"Игроки: {task_data.get('players')}")
+        reply_str.append("Покинуть игру?")
     elif next_stage > CONFIRM:
         reply_str.append(f"Игроки: {task_data.get('players')}")
 
