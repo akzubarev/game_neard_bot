@@ -54,9 +54,12 @@ async def game(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 async def date_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query_message = update.message.text.strip()
+    now = datetime.now()
     game_date_time = datetime.strptime(
         query_message, STRF_DATE_TIME
-    ).replace(year=datetime.now().year)
+    ).replace(year=now.year)
+    if game_date_time < now:
+        game_date_time = game_date_time.replace(year=now.year + 1)
     context.user_data["game"]["date_time"] = game_date_time
 
     # is_manager = await db.user_is_manager(tg_id=update.message.from_user.id)
