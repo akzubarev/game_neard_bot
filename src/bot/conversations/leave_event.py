@@ -107,7 +107,7 @@ def reply_text(next_stage: int, task_data: dict, can_see_players: bool = True):
         if can_see_players is True:
             reply_str.append(f"Игроки: {task_data.get('players')}")
         reply_str.append("Покинуть игру?")
-    elif next_stage > CONFIRM:
+    elif next_stage > CONFIRM and can_see_players is True:
         reply_str.append(f"Игроки: {task_data.get('players')}")
 
     if next_stage == END:
